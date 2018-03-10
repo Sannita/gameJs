@@ -1,3 +1,5 @@
 # gameJs
-for statJs see mrdoob / http://mrdoob.com/
-based on article http://articles.edwardsoft.com/private-prototype-functions
+Uses stats.js, Author mrdoob: http://mrdoob.com/
+Repository: https://github.com/mrdoob/stats.js/
+
+Based on the article http://articles.edwardsoft.com/private-prototype-functions
