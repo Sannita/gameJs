@@ -59,32 +59,86 @@
 		g.utils.bindPublicProtoFunctions(this, data);
 	}
 	
-	Engine.prototype.mainLoop_ = function(data){
-		console.log(data);
+	Engine.prototype.processInput_ = function(data){
 		if(!(data instanceof EngineData))
 			throw new Error('Trying to call private method');
 		
+		var items = data.world.getItems();
+		for (var i in items) {
+			if (items.hasOwnProperty(i)) {
+				items[i].processInput(data.input);
+			}
+		}
+	}
+	
+	Engine.prototype.update_ = function(data){
+		if(!(data instanceof EngineData))
+			throw new Error('Trying to call private method');
+		
+		var items = data.world.getItems();
+		for (var i in items) {
+			if (items.hasOwnProperty(i)) {
+				if(items[i].toDelete){
+					delete items[i];
+					continue;
+				}
+				items[i].update(data.world);
+			}
+		}
+	}
+	
+	Engine.prototype.render_ = function(data, alpha){
+		if(!(data instanceof EngineData))
+			throw new Error('Trying to call private method');
+		
+		data.ctx.clearRect(0,0, data.world.getWidth(), data.world.getHeight());
+		var items = data.world.getItems();
+		for (var i in items) {
+			if (items.hasOwnProperty(i)) {
+				items[i].render(data.ctx, alpha);
+			}
+		}
+	}
+	
+	Engine.prototype.mainLoop_ = function(data){
+		var engine = this;
+		if(!(data instanceof EngineData))
+			throw new Error('Trying to call private method');
+		
+		var tps = 50;
+		var dt = 1000 / tps;
+		var maxFrameSkip = 5;
+		var currentTime = performance.now();
+		var accumulator = 0;
+		var t = 0;
 		var loop = function(timestamp) {
 			if(data.debug){
 				data.stats.begin();
 			}
 			
-			data.ctx.clearRect(0,0, data.world.getWidth(), data.world.getHeight());
+			engine.processInput_(data);
 			
-			var items = data.world.getItems();
-			for(var i= 0; i < items.length; i++){
-				items[i].processInput(data.input);
+			var newTime =  performance.now();
+			var frameTime = newTime - currentTime;
+			if ( frameTime > 1000 / maxFrameSkip ){
+				frameTime = 1000 / maxFrameSkip;
 			}
-			for(var i= 0; i < items.length; i++){
-				items[i].update(data.world);
+			currentTime = newTime;
+			accumulator += frameTime;
+			while ( accumulator >= dt )
+			{
+				engine.update_(data);
+				accumulator -= dt;
+				t += dt;
 			}
-			for(var i= 0; i < items.length; i++){
-				items[i].render(data.ctx);
-			}
+			
+			var alpha = accumulator / dt;
+			engine.render_(data, alpha);
 			
 			if(data.debug){
 				data.stats.end();
 			}
+			
 			if(data.running){
 				window.requestAnimationFrame(loop);
 			}
@@ -97,6 +151,14 @@
 		data.world.init();
 	}
 	
+	Engine.prototype.update = function(data){
+		this.update_(data);
+	}
+	
+	Engine.prototype.render = function(data){
+		this.render_(data, 1);
+	}
+	
 	Engine.prototype.start = function(data){
 		data.running = true;
 		this.mainLoop_(data);
@@ -104,6 +166,10 @@
 	
 	Engine.prototype.stop = function(data){
 		data.running = false;
+	}
+	
+	Engine.prototype.getContext = function(data){
+		return data.ctx;
 	}
 	
 	g.Engine = Engine;

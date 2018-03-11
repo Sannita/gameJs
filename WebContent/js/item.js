@@ -1,40 +1,42 @@
 (function(g,undefined){
 	
 	var ItemData = function(){
+		this.itemId = null;
 		this.h = 0;
 		this.w = 0;
 		this.x = 0;
 		this.y = 0;
+		this.oldX = 0;
+		this.oldY = 0;
+		this.errX = 0;
+		this.errY = 0;
 		this.vx = 0;
 		this.vy = 0;
+		this.oldVx = 0;
+		this.oldVy = 0;
 		this.ax = 0;
 		this.ay = 0;
+		this.color = 'rgba(0,0,0,0)';
 	};
 	
-	//---- Point ----
-	// Object constructor
-	var Item = function(data)
+	var Item = function(h, w, data)
 	{
-	  // container for private vars: now we assume data
-	  // may also be passed from the outside
 	  var data = data || new ItemData;
+	  data.h = h;
+	  data.w = w;
 	  g.utils.bindPublicProtoFunctions(this, data);
 	}
-/*
-	// private prototype functions have trailing underscore in their names
-	// Calculates the distance between this and other point.
-	Point.prototype.distance_ = function(data, point)
+
+	Item.prototype.getItemId = function(data)
 	{
-	  if(!(data instanceof oop.DataStore))
-		throw new Error('Trying to call private method');
-
-	  var dx = data.x - point.getX(), dy = data.y - point.getY();
-	  return Math.sqrt(dx * dx + dy * dy);
+	  return data.itemId;
 	}
-	*/
-	// public prototype functions: called by instance wrappers only,
-	// so there is no need to check for 'data'
-
+	
+	Item.prototype.setItemId = function(data, itemId)
+	{
+	  data.itemId = itemId;
+	}
+	
 	Item.prototype.getWidth = function(data)
 	{
 	  return data.w;
@@ -83,11 +85,15 @@
 	Item.prototype.setPos = function(data,x,y){
 		data.x = x;
 		data.y = y;
+		data.oldX = x;
+		data.oldY = y;
 	}
 	
 	Item.prototype.setSpeed = function(data,vx,vy){
 		data.vx = vx;
 		data.vy = vy;
+		data.oldVx = vx;
+		data.oldVy = vy;
 	}
 	
 	Item.prototype.setAccel = function(data,ax,ay){
@@ -95,24 +101,29 @@
 		data.ay = ay;
 	}
 	
-	Item.prototype.move = function(data){
-		data.x += data.vx;
-		data.vx += data.ax;
-		data.y += data.vy;
-		data.vy += data.ay;
+	Item.prototype.setColor = function(data, color) {
+		color = color || 'rgba(0,0,0,0)';
+		data.color = color;
 	}
 	
 	Item.prototype.processInput = function(data, input){
-		//console.log('input: ' + input);
+		
 	}
 	
-	Item.prototype.update = function(data, world){
-		//console.log('update: ' + world);
+	Item.prototype.update = function(data, world, t, dt){
+		
 	}
 	
-	Item.prototype.render = function(data, ctx){
+	Item.prototype.render = function(data, ctx, alpha){
+		alpha = alpha || 1;
+		
+		var x = alpha * data.x + (1 - alpha) * data.oldX;
+		var y = alpha * data.y + (1 - alpha) * data.oldY;
+		
 		ctx.beginPath();
-		ctx.rect(data.x,data.y,data.w,data.h);
+		ctx.rect(x,y,data.w,data.h);
+		ctx.fillStyle = data.color;
+		ctx.fill();
 		ctx.stroke();
 	}
 	
