@@ -21,7 +21,7 @@
 			clearTimeout(id);
 		};
 	}
-	
+
 	var EngineData = function(){
 		this.canvas = null;
 		this.ctx = null;
@@ -30,81 +30,98 @@
 		this.stats = null;
 		this.world = null;
 	};
-	
-	var Engine = function(world){
+
+	var Engine = function(world, inputListener){
 		var data = data || new EngineData;
 		data.world = world;
+		data.inputListener = inputListener;
 
 		var canvas = document.getElementById('canvas');
 		canvas.height = world.getHeight();
 		canvas.width = world.getWidth();
-		
+
 
 		if (typeof (canvas.getContext) === undefined) {
 			throw new Error('not canvas');
 		}
 
 		var ctx = canvas.getContext('2d');
-		
+
 		data.canvas = canvas;
 		data.ctx = ctx;
-		
-		if(data.debug){	
+
+		if(data.debug){
 			var stats = new Stats();
 			stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
 			document.body.appendChild( stats.dom );
 			data.stats = stats;
 		}
-		
+
 		g.utils.bindPublicProtoFunctions(this, data);
 	}
-	
-	Engine.prototype.processInput_ = function(data){
+
+	Engine.prototype.handleInput_ = function(data){
 		if(!(data instanceof EngineData))
 			throw new Error('Trying to call private method');
-		
+
+		var input =  data.inputListener.getInput();
+
 		var items = data.world.getItems();
 		for (var i in items) {
 			if (items.hasOwnProperty(i)) {
-				items[i].processInput(data.input);
-			}
-		}
-	}
-	
-	Engine.prototype.update_ = function(data){
-		if(!(data instanceof EngineData))
-			throw new Error('Trying to call private method');
-		
-		var items = data.world.getItems();
-		for (var i in items) {
-			if (items.hasOwnProperty(i)) {
-				if(items[i].toDelete){
+				if(items[i].isToDelete()){
 					delete items[i];
 					continue;
 				}
-				items[i].update(data.world);
+				if(items[i].isActive()){
+					items[i].handleInput(input);
+				}
 			}
 		}
 	}
-	
+
+	Engine.prototype.update_ = function(data){
+		if(!(data instanceof EngineData))
+			throw new Error('Trying to call private method');
+
+		var items = data.world.getItems();
+		for (var i in items) {
+			if (items.hasOwnProperty(i)) {
+				if(items[i].isToDelete()){
+					delete items[i];
+					continue;
+				}
+				if(items[i].isActive()){
+					items[i].update(data.world);
+				}
+			}
+		}
+	}
+
 	Engine.prototype.render_ = function(data, alpha){
 		if(!(data instanceof EngineData))
 			throw new Error('Trying to call private method');
-		
+
 		data.ctx.clearRect(0,0, data.world.getWidth(), data.world.getHeight());
 		var items = data.world.getItems();
 		for (var i in items) {
 			if (items.hasOwnProperty(i)) {
-				items[i].render(data.ctx, alpha);
+				if(items[i].isToDelete()){
+					delete items[i];
+					continue;
+				}
+				if(items[i].isVisible()){
+					items[i].render(data.ctx, alpha);
+				}
 			}
 		}
 	}
-	
+
 	Engine.prototype.mainLoop_ = function(data){
 		var engine = this;
 		if(!(data instanceof EngineData))
 			throw new Error('Trying to call private method');
-		
+
 		var tps = 50;
 		var dt = 1000 / tps;
 		var maxFrameSkip = 5;
@@ -115,9 +132,9 @@
 			if(data.debug){
 				data.stats.begin();
 			}
-			
-			engine.processInput_(data);
-			
+
+			engine.handleInput_(data);
+
 			var newTime =  performance.now();
 			var frameTime = newTime - currentTime;
 			if ( frameTime > 1000 / maxFrameSkip ){
@@ -131,46 +148,46 @@
 				accumulator -= dt;
 				t += dt;
 			}
-			
+
 			var alpha = accumulator / dt;
 			engine.render_(data, alpha);
-			
+
 			if(data.debug){
 				data.stats.end();
 			}
-			
+
 			if(data.running){
 				window.requestAnimationFrame(loop);
 			}
 		}
-		
+
 		loop(performance.now());
 	}
-	
+
 	Engine.prototype.init = function(data){
 		data.world.init();
 	}
-	
+
 	Engine.prototype.update = function(data){
 		this.update_(data);
 	}
-	
+
 	Engine.prototype.render = function(data){
 		this.render_(data, 1);
 	}
-	
+
 	Engine.prototype.start = function(data){
 		data.running = true;
 		this.mainLoop_(data);
 	}
-	
+
 	Engine.prototype.stop = function(data){
 		data.running = false;
 	}
-	
+
 	Engine.prototype.getContext = function(data){
 		return data.ctx;
 	}
-	
+
 	g.Engine = Engine;
 })(window.gameJs);
