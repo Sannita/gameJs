@@ -122,7 +122,7 @@
 		if(!(data instanceof EngineData))
 			throw new Error('Trying to call private method');
 
-		var tps = 50;
+		var tps = 25;
 		var dt = 1000 / tps;
 		var maxFrameSkip = 5;
 		var currentTime = performance.now();

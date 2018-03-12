@@ -41,6 +41,9 @@
 		if( data.vy > 0 && data.y > world.getHeight() - 2 * data.radius){
 			data.y = world.getHeight() - 2 * data.radius;
 			data.vy *= -1;
+			data.bounce = true;
+		}else{
+			data.bounce = false;
 		}
 		if( data.vy < 0 && data.y < 0){
 			data.y = 0;
@@ -74,7 +77,12 @@
 		var x = alpha * data.x + (1 - alpha) * data.oldX + data.radius;
 		var y = alpha * data.y + (1 - alpha) * data.oldY + data.radius;
 		ctx.beginPath();
-		ctx.arc(x, y, data.radius, 0, Math.PI * 360);
+		if(data.bounce){
+			ctx.ellipse(x, y + data.radius * 0.15, data.radius / 0.85 , data.radius * 0.85, 0, 0, 2 * Math.PI);
+		}else{
+			ctx.arc(x, y, data.radius, 0, 2 * Math.PI);
+		}
+
 		ctx.fillStyle = data.color;
 		ctx.fill();
 		ctx.stroke();

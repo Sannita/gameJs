@@ -31,20 +31,21 @@ Your browser does not support the HTML5 canvas tag.
 	var world = new g.World(800,600);
 	var engine = new g.Engine(world, inputListener);
 	//var i = g.utils.getRandomInt(0,1023);
-	var start = 0;
+	/*var start = 0;
 	var end = 512;
 	var bar = new g.items.Bar(start, end, 5, 775);
 	bar.setColor('red');
 	bar.setPos(10,10);
 	world.addItem(bar);
 	engine.render();
+
 	var i = start;
 	function addBall(){
 		var size = g.utils.getRandomInt(5,30);
 		var startX = g.utils.getRandomInt(10,790 - 2*size);
 		var startY = g.utils.getRandomInt(30,590 - 2*size);
-		var startVx = g.utils.getRandomInt(-5,5);
-		var startVy = g.utils.getRandomInt(-5,5);
+		var startVx = g.utils.getRandomInt(-10,10);
+		var startVy = g.utils.getRandomInt(-10,10);
 		var color = g.utils.findColor(i%256);
 		var ball = new g.items.Ball(size);
 		ball.setPos(startX,startY);
@@ -74,13 +75,17 @@ Your browser does not support the HTML5 canvas tag.
 	}
 
 	addBall();
+*/
 
 
-/*
 	var ball1 = new g.items.Ball(20);
 	ball1.setPos(100,100);
 	ball1.setSpeed(0,0);
-	ball1.setAccel(0,0);
+	ball1.setAccel(0,1);
+	ball1.setColor(g.utils.findColor(g.utils.getRandomInt(0,256))['hexString']);
+	world.addItem(ball1);
+	engine.render();
+	engine.start();
 	/*var ball2 = new g.items.Ball(20);
 	ball2.setPos(500,100);
 	ball2.setSpeed(0,0);
@@ -90,7 +95,7 @@ Your browser does not support the HTML5 canvas tag.
 	item.setPos(100,100);
 	item.setSpeed(0,0);
 	//item.setAccel(0,0.1);*/
-/*	world.addItem(ball1);
+
 	/*world.addItem(ball2);*/
 /*  var color = g.utils.findColor(184)
 
