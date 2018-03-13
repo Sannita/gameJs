@@ -15,7 +15,7 @@ Your browser does not support the HTML5 canvas tag.
 </canvas>
 
 <script type="text/javascript" src="js/stats.js"></script>
-<script type="text/javascript" src="js/prototypes.js"></script>
+<script type="text/javascript" src="js/core.js"></script>
 <script type="text/javascript" src="js/colors.js"></script>
 <script type="text/javascript" src="js/engine.js"></script>
 <script type="text/javascript" src="js/inputListener.js"></script>
@@ -27,11 +27,12 @@ Your browser does not support the HTML5 canvas tag.
 <script type="text/javascript">
 (function(g, undefined){
 
-  var inputListener = new g.InputListener();
+
 	var world = new g.World(800,600);
+	var inputListener = new g.InputListener();
 	var engine = new g.Engine(world, inputListener);
 	//var i = g.utils.getRandomInt(0,1023);
-	/*var start = 0;
+	var start = 0;
 	var end = 512;
 	var bar = new g.items.Bar(start, end, 5, 775);
 	bar.setColor('red');
@@ -63,61 +64,19 @@ Your browser does not support the HTML5 canvas tag.
 		if((100 * i / end) < 30){
 			bar.setColor('red');
 		}
+		ball.preRender();
 		engine.render();
 		i++;
 		if(i < end){
 			window.setTimeout(addBall, 1);
 		}else{
-			console.log(world.getItems());
 			bar.setToDelete(true);
+			world.init();
 			engine.start();
 		}
 	}
 
 	addBall();
-*/
-
-
-	var ball1 = new g.items.Ball(20);
-	ball1.setPos(100,100);
-	ball1.setSpeed(0,0);
-	ball1.setAccel(0,1);
-	ball1.setColor(g.utils.findColor(g.utils.getRandomInt(0,256))['hexString']);
-	world.addItem(ball1);
-	engine.render();
-	engine.start();
-	/*var ball2 = new g.items.Ball(20);
-	ball2.setPos(500,100);
-	ball2.setSpeed(0,0);
-	ball2.setAccel(1,0);*/
-	/*var item = new g.items.Item();
-	item.setSize(40,40);
-	item.setPos(100,100);
-	item.setSpeed(0,0);
-	//item.setAccel(0,0.1);*/
-
-	/*world.addItem(ball2);*/
-/*  var color = g.utils.findColor(184)
-
-	var bar = new g.items.Bar(0, 100);
-	bar.setColor('green');
-	bar.setPos(200,200);
-	world.addItem(bar);
-	var bar2 = new g.items.Bar(0, 100);
-	bar2.setColor('blue');
-	bar2.setPos(200,250);
-	world.addItem(bar2);
-	var bar3 = new g.items.Bar(0, 100);
-	bar3.setColor(color['hexString']);
-	bar3.setPos(200,300);
-	world.addItem(bar3);
-	var bar4 = new g.items.Bar(0, 100);
-	bar4.setColor('red');
-	bar4.setPos(200,350);
-	world.addItem(bar4);
-
-	console.log(world.getItems());
-*/
 
 	/*
 	var i = 0;

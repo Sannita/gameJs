@@ -1,28 +1,63 @@
 (function(g,undefined){
+	var BaseState = function(data){
+		var state = this;
+		var imageData = null;
+
+		state.preRender = function(data){
+			imageData = g.utils.preRender(data.w, data.h, function(ctx){
+				ctx.beginPath();
+				ctx.rect(1,1,data.w,data.h);
+				ctx.fillStyle = data.color;
+				ctx.fill();
+				ctx.stroke();
+			});
+		}
+
+		state.handleInput = function(item, input){
+
+		}
+		state.enter = function(item, input){
+
+		}
+		state.update = function(item, world){
+
+		}
+		state.render = function(item, ctx, alpha){
+			alpha = alpha || 1;
+
+			var x = alpha * data.x + (1 - alpha) * data.oldX;
+			var y = alpha * data.y + (1 - alpha) * data.oldY;
+
+			ctx.drawImage(imageData, x, y);
+		}
+	}
+
 	var ItemData = function(){
-		this.itemId = null;
-		this.h = 0;
-		this.w = 0;
-		this.x = 0;
-		this.y = 0;
-		this.oldX = 0;
-		this.oldY = 0;
-		this.errX = 0;
-		this.errY = 0;
-		this.vx = 0;
-		this.vy = 0;
-		this.oldVx = 0;
-		this.oldVy = 0;
-		this.ax = 0;
-		this.ay = 0;
-		this.color = 'rgba(0,0,0,0)';
-		this.isVisible = true;
-		this.isActive = true;
-		this.toDelete = false;
-	};
-
-	var ItemState = function(){
-
+		var itemData = this;
+		itemData.itemId = null;
+		itemData.h = 0;
+		itemData.w = 0;
+		itemData.x = 0;
+		itemData.y = 0;
+		itemData.oldX = 0;
+		itemData.oldY = 0;
+		itemData.errX = 0;
+		itemData.errY = 0;
+		itemData.vx = 0;
+		itemData.vy = 0;
+		itemData.maxVx = 0;
+		itemData.maxVy = 0;
+		itemData.oldVx = 0;
+		itemData.oldVy = 0;
+		itemData.ax = 0;
+		itemData.ay = 0;
+		itemData.currAx = 0;
+		itemData.currAy = 0;
+		itemData.color = 'rgba(0,0,0,0)';
+		itemData.isVisible = true;
+		itemData.isActive = true;
+		itemData.toDelete = false;
+		itemData.state = {};
 	};
 
 	var Item = function(h, w, data)
@@ -30,6 +65,7 @@
 	  var data = data || new ItemData();
 	  data.h = h;
 	  data.w = w;
+		data.state = new BaseState(data);
 	  g.utils.bindPublicProtoFunctions(this, data);
 	}
 
@@ -105,6 +141,8 @@
 	Item.prototype.setAccel = function(data,ax,ay){
 		data.ax = ax;
 		data.ay = ay;
+		data.currAx = ax;
+		data.currAy = ay;
 	}
 
 	Item.prototype.setColor = function(data, color) {
@@ -138,27 +176,26 @@
 	}
 
 	Item.prototype.handleInput = function(data, input){
-		//console.log(input);
+		var state = data.state.handleInput(data, input);
+		if(state){
+			data.state = state;
+			data.state.enter(data, input);
+		}
 	}
 
 	Item.prototype.update = function(data, world, t, dt){
-
+		data.state.update(data, world);
 	}
 
 	Item.prototype.render = function(data, ctx, alpha){
-		alpha = alpha || 1;
-
-		var x = alpha * data.x + (1 - alpha) * data.oldX;
-		var y = alpha * data.y + (1 - alpha) * data.oldY;
-
-		ctx.beginPath();
-		ctx.rect(x,y,data.w,data.h);
-		ctx.fillStyle = data.color;
-		ctx.fill();
-		ctx.stroke();
+		data.state.render(data, ctx, alpha);
 	}
 
-  g.items.ItemData = ItemData;
-  g.items.ItemState = ItemState;
+	Item.prototype.preRender = function(data){
+		data.state.preRender(data);
+	}
+
+
+	g.items.ItemData = ItemData;
 	g.items.Item = Item;
 })(window.gameJs);

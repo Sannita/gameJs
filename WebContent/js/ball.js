@@ -1,11 +1,229 @@
 (function(g, Item, undefined){
+	var initStates = function(data){
+		var baseUpdate = function(item, world){
+			item.oldVx = item.vx;
+			item.oldVy = item.vy;
+
+			item.vx += item.currAx;
+			item.vy += item.currAy;
+
+			if(item.vx > 0 && item.vx > item.maxVx){
+				item.vx = item.maxVx;
+			}
+
+			if(item.vx < 0 && -item.vx > item.maxVx){
+				item.vx = -item.maxVx;
+			}
+
+			item.oldX = item.x;
+			item.oldY = item.y;
+
+			item.x += item.vx;
+			item.y += item.vy;
+
+			item.errX = 0;
+			item.errY = 0;
+
+			if( item.vx > 0 && item.x > world.getWidth() - 2 * item.radius){
+				item.x = world.getWidth() - 2 * item.radius;
+				item.vx *= -1;
+			}
+			if( item.vx < 0 && item.x < 0){
+				item.x = 0;
+				item.vx *= -1;
+			}
+			if( item.vy > 0 && item.y > world.getHeight() - 2 * item.radius){
+				item.y = world.getHeight() - 2 * item.radius;
+				item.vy *= -1;
+				item.bounce = true;
+			}else{
+				item.bounce = false;
+			}
+			if( item.vy < 0 && item.y < 0){
+				item.y = 0;
+				item.vy *= -1;
+			}
+		}
+
+		var StandOrMove = function(){
+			var state = this;
+			var imageData = null;
+
+			state.preRender = function(data){
+				imageData = g.utils.preRender(2 * data.radius, 2 * data.radius, function(ctx){
+					ctx.beginPath();
+					ctx.arc(data.radius + 1, data.radius + 1, data.radius, 0, 2 * Math.PI);
+					ctx.fillStyle = data.color;
+					ctx.fill();
+					ctx.stroke();
+				});
+			}
+
+			state.handleInput = function(item, input){
+				if(item.bounce){
+					return item.bouncingState;
+				}
+				if(input['KeyA'] || input['KeyD'] || input['KeyW'] || input['KeyS']){
+					return item.acceleratingState;
+				}
+				return null;
+			}
+			state.enter = function(item, input){
+				item.currAx = item.ax;
+				item.currAy = item.ay;
+			}
+			state.update = baseUpdate;
+			state.render = function(item, ctx, alpha){
+				alpha = alpha || 1;
+
+				var x = alpha * item.x + (1 - alpha) * item.oldX;
+				var y = alpha * item.y + (1 - alpha) * item.oldY;
+
+				ctx.drawImage(imageData, x, y);
+			}
+		}
+
+		var Accelerating = function(){
+			var state = this;
+			var imageData = null;
+
+			state.preRender = function(data){
+				imageData = g.utils.preRender(2 * data.radius, 2 * data.radius, function(ctx){
+					ctx.beginPath();
+					ctx.arc(data.radius + 1, data.radius + 1, data.radius, 0, 2 * Math.PI);
+					ctx.fillStyle = data.color;
+					ctx.fill();
+					ctx.stroke();
+				});
+			}
+
+			state.handleInput = function(item, input){
+				if(item.bounce){
+					return item.bouncingState;
+				}
+				if(!input['KeyA'] && !input['KeyD'] && !input['KeyW'] && !input['KeyS']){
+					return item.standOrMoveState;
+				}
+				return null;
+			}
+
+			state.enter = function(item, input){
+				if(input['KeyA']){
+					item.currAx = item.ax - 1;
+				}
+				if(input['KeyD']){
+					item.currAx = item.ax + 1;
+				}
+				if(input['KeyW']){
+					item.currAy = item.ay - 1;
+				}
+				if(input['KeyS']){
+					item.currAy = item.ay + 1;
+				}
+			}
+
+			state.update = baseUpdate;
+			state.render = function(item, ctx, alpha){
+				alpha = alpha || 1;
+
+				var x = alpha * item.x + (1 - alpha) * item.oldX;
+				var y = alpha * item.y + (1 - alpha) * item.oldY;
+
+				ctx.drawImage(imageData, x, y);
+			}
+		}
+
+		var Bouncing = function(){
+			var frame = 0;
+			var frames = [0.04, 0.08, 0.12, 0.16, 0.12, 0.08, 0.04];
+			var imageData = [];
+
+			var state = this;
+
+			state.preRender = function(data){
+				for(var i=0;i<frames.length;i++){
+					var d = frames[i];
+					var r1 = data.radius / (1 - d);
+					var r2 = data.radius * (1 - d)
+
+					imageData[i] = g.utils.preRender(2 * r1, 2 * r2, function(ctx){
+						var d = frames[i];
+						ctx.beginPath();
+						ctx.ellipse(r1, r2, r1 , r2, 0, 0, 2 * Math.PI);
+						ctx.fillStyle = data.color;
+						ctx.fill();
+						ctx.stroke();
+					});
+				}
+			}
+
+			state.enter = function(item, input){
+				frame = 0;
+			}
+			state.handleInput = function(item, input){
+				if(frame >= frames.length){
+					item.bounce = false;
+					return item.standOrMoveState;
+				}
+			}
+			state.update = function(item, world){
+				var d = (1 + frame) / frames.length;
+
+				item.vx += item.currAx;
+
+				if(item.vx > 0 && item.vx > item.maxVx){
+					item.vx = item.maxVx;
+				}
+
+				if(item.vx < 0 && -item.vx > item.maxVx){
+					item.vx = -item.maxVx;
+				}
+
+				item.oldX = item.x;
+				item.x += item.vx * d;
+
+				if( item.vx > 0 && item.x > world.getWidth() - 2 * item.radius){
+					item.x = world.getWidth() - 2 * item.radius;
+					item.vx *= -1;
+				}
+				if( item.vx < 0 && item.x < 0){
+					item.x = 0;
+					item.vx *= -1;
+				}
+			}
+			state.render = function(item, ctx, alpha){
+				alpha = alpha || 1;
+
+				var x = alpha * item.x + (1 - alpha) * item.oldX;
+				var y = alpha * item.y + (1 - alpha) * item.oldY;
+
+				//x = item.x + item.radius;
+				y = item.y;
+
+				var d = frames[frame];
+
+				ctx.drawImage(imageData[frame], x - (data.radius * d), y + (data.radius * d * 2));
+
+				frame++;
+			}
+		}
+
+		data.standOrMoveState = new StandOrMove();
+		data.acceleratingState = new Accelerating();
+		data.bouncingState = new Bouncing();
+		data.state = data.standOrMoveState;
+	}
 
 	var Ball = function(radius)
 	{
 	  var data = new g.items.ItemData();
 	  data.radius = radius;
+		data.maxVx = 30;
+		data.maxVy = 30;
 
-	  Item.call(this, 2 * radius, 2 * radius, data);
+		Item.call(this, 2 * radius, 2 * radius, data);
+
+		initStates(data);
 	}
 
 	g.utils.inherits(Ball, Item);
@@ -15,86 +233,17 @@
 	}
 
 	Ball.prototype.update = function(data, world, t, dt){
-		data.oldVx = data.vx;
-		data.oldVy = data.vy;
-
-		data.vx += data.ax;
-		data.vy += data.ay;
-
-		data.oldX = data.x;
-		data.oldY = data.y;
-
-		data.x += data.vx;
-		data.y += data.vy;
-
-		data.errX = 0;
-		data.errY = 0;
-
-		if( data.vx > 0 && data.x > world.getWidth() - 2 * data.radius){
-			data.x = world.getWidth() - 2 * data.radius;
-			data.vx *= -1;
-		}
-		if( data.vx < 0 && data.x < 0){
-			data.x = 0;
-			data.vx *= -1;
-		}
-		if( data.vy > 0 && data.y > world.getHeight() - 2 * data.radius){
-			data.y = world.getHeight() - 2 * data.radius;
-			data.vy *= -1;
-			data.bounce = true;
-		}else{
-			data.bounce = false;
-		}
-		if( data.vy < 0 && data.y < 0){
-			data.y = 0;
-			data.vy *= -1;
-		}
-
-		/*
-		var items = world.getItems();
-		for(var i=0;i<items.length;i++){
-			if(this.collide(data, items[i])){
-				if(data.vx > 0){
-					data.x = items[i].getX() - data.radius - items[i].getRadius();
-				}
-				if(data.vx < 0){
-					data.x = items[i].getX() + data.radius + items[i].getRadius();
-				}
-				if(data.vy > 0){
-					data.y = items[i].getY() - data.radius - items[i].getRadius();
-				}
-				if(data.vy < 0){
-					data.y = items[i].getY() + data.radius + items[i].getRadius();
-				}
-				data.toDelete = true;
-			}
-		}*/
+		data.state.update(data, world);
 	}
 
 	Ball.prototype.render = function(data, ctx, alpha ){
-		alpha = alpha || 1;
+		data.state.render(data,ctx,alpha);
+	}
 
-		var x = alpha * data.x + (1 - alpha) * data.oldX + data.radius;
-		var y = alpha * data.y + (1 - alpha) * data.oldY + data.radius;
-		ctx.beginPath();
-		if(data.bounce){
-			ctx.ellipse(x, y + data.radius * 0.15, data.radius / 0.85 , data.radius * 0.85, 0, 0, 2 * Math.PI);
-		}else{
-			ctx.arc(x, y, data.radius, 0, 2 * Math.PI);
-		}
-
-		ctx.fillStyle = data.color;
-		ctx.fill();
-		ctx.stroke();
-		/*
-		console.log(JSON.stringify({
-			alpha: alpha,
-			y : data.y,
-			oldY : data.oldY,
-			vy : data.vy,
-			errY : data.errY,
-			rY : y
-		}));*/
+	Ball.prototype.preRender = function(data){
+		data.standOrMoveState.preRender(data);
+		data.acceleratingState.preRender(data);
+		data.bouncingState.preRender(data);
 	}
 
 	Ball.prototype.collide = function(data, ball){

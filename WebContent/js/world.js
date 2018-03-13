@@ -15,7 +15,11 @@
 	}
 
 	World.prototype.init = function(data){
-		//console.log('init');
+		for (var i in data.items) {
+			if (data.items.hasOwnProperty(i)) {
+					data.items[i].preRender();
+			}
+		}
 	}
 
 	World.prototype.getWidth = function(data){
@@ -39,22 +43,6 @@
 	World.prototype.getItem = function(data, itemId){
 		return data.items[itemId];
 	}
-
-	/*World.prototype.checkCollisions = function(data){
-		for(var i=0;i<data.items.length;i++){
-			if(data.items[i].collision){
-				continue;
-			}
-			for(var j=i+1;j<data.items.length;j++){
-
-				if(i != j && !data.items[j].collision && data.items[i].collide(data.items[j])){
-					data.items[i].collision = true;
-					data.items[j].collision = true;
-					break;
-				}
-			}
-		}
-	}*/
 
 	g.World = World;
 })(window.gameJs);
