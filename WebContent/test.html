@@ -10,32 +10,51 @@ html, body, canvas{
 </head>
 <body>
 
-<canvas id="canvas" style="border:1px solid #000000;">
-Your browser does not support the HTML5 canvas tag.
-</canvas>
+<div id="container" style="border:1px solid #000000;">
+</div>
+<div>
+	<sstrike>-Refactor and polish source code.</sstrike><br>
+	--Customizable engine<br>
+	-Implement a physics component to decouple and generalize some logics from game objects.<br>
+	-- Implement collisions.<br>
+	-Abstract commands implementing the command pattern and use it in conjuction with state pattern.<br>
+	-- Implement simple AI to drive object using the command pattern.<br>
+	-Implement an audio component to play sounds.<br>
+	-Implement UI component.<br>
+	-Realize a demo game.<br>
+</div>
+
 
 <script type="text/javascript" src="js/stats.js"></script>
 <script type="text/javascript" src="js/core.js"></script>
 <script type="text/javascript" src="js/colors.js"></script>
-<script type="text/javascript" src="js/engine.js"></script>
+<script type="text/javascript" src="js/physics.js"></script>
 <script type="text/javascript" src="js/inputListener.js"></script>
+<script type="text/javascript" src="js/engine.js"></script>
 <script type="text/javascript" src="js/world.js"></script>
+<script type="text/javascript" src="js/state.js"></script>
 <script type="text/javascript" src="js/items.js"></script>
 <script type="text/javascript" src="js/ball.js"></script>
+<script type="text/javascript" src="js/car.js"></script>
 <script type="text/javascript" src="js/bar.js"></script>
 
 <script type="text/javascript">
 (function(g, undefined){
+	var w = 800;
+	var h = 600;
 
-
-	var world = new g.World(800,600);
+	var world = new g.World(w,h);
+	//var ui = new g.ui(800,600);
 	var inputListener = new g.InputListener();
-	var engine = new g.Engine(world, inputListener);
+	var physics = new g.Physics();
+	var engine = new g.Engine(world, inputListener, physics);
+	engine.init('container');
 	//var i = g.utils.getRandomInt(0,1023);
+
 	var start = 0;
 	var end = 512;
 	var bar = new g.items.Bar(start, end, 5, 775);
-	bar.setColor('red');
+	bar.setColor('green');
 	bar.setPos(10,10);
 	world.addItem(bar);
 	engine.render();
@@ -55,15 +74,6 @@ Your browser does not support the HTML5 canvas tag.
 		ball.setColor(color['hexString']);
 		world.addItem(ball);
 		bar.setValue(bar.getValue() + 1);
-		if((100 * i / end) >= 70){
-			bar.setColor('green');
-		}
-		if((100 * i / end) < 70){
-			bar.setColor(g.utils.findColor(184)['hexString']);
-		}
-		if((100 * i / end) < 30){
-			bar.setColor('red');
-		}
 		ball.preRender();
 		engine.render();
 		i++;
@@ -91,8 +101,15 @@ Your browser does not support the HTML5 canvas tag.
 	}
 
 	window.setTimeout(loop , 1000);
-		*/
+		*//*
+		var car = new g.items.Car(18,32);
+		car.setPos(100,100);
+		car.setSpeed(0,0);
+		car.setAccel(5,5);
+		car.setColor(g.utils.findColor(g.utils.getRandomInt(0,256))['hexString']);
+		world.addItem(car);
 
+		engine.start();*/
 })(window.gameJs);
 </script>
 </body>

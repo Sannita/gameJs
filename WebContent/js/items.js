@@ -1,36 +1,4 @@
 (function(g,undefined){
-	var BaseState = function(data){
-		var state = this;
-		var imageData = null;
-
-		state.preRender = function(data){
-			imageData = g.utils.preRender(data.w, data.h, function(ctx){
-				ctx.beginPath();
-				ctx.rect(1,1,data.w,data.h);
-				ctx.fillStyle = data.color;
-				ctx.fill();
-				ctx.stroke();
-			});
-		}
-
-		state.handleInput = function(item, input){
-
-		}
-		state.enter = function(item, input){
-
-		}
-		state.update = function(item, world){
-
-		}
-		state.render = function(item, ctx, alpha){
-			alpha = alpha || 1;
-
-			var x = alpha * data.x + (1 - alpha) * data.oldX;
-			var y = alpha * data.y + (1 - alpha) * data.oldY;
-
-			ctx.drawImage(imageData, x, y);
-		}
-	}
 
 	var ItemData = function(){
 		var itemData = this;
@@ -41,18 +9,16 @@
 		itemData.y = 0;
 		itemData.oldX = 0;
 		itemData.oldY = 0;
-		itemData.errX = 0;
-		itemData.errY = 0;
-		itemData.vx = 0;
-		itemData.vy = 0;
 		itemData.maxVx = 0;
 		itemData.maxVy = 0;
+		itemData.vx = 0;
+		itemData.vy = 0;
 		itemData.oldVx = 0;
 		itemData.oldVy = 0;
+		itemData.maxAx = 0;
+		itemData.maxAy = 0;
 		itemData.ax = 0;
 		itemData.ay = 0;
-		itemData.currAx = 0;
-		itemData.currAy = 0;
 		itemData.color = 'rgba(0,0,0,0)';
 		itemData.isVisible = true;
 		itemData.isActive = true;
@@ -65,7 +31,7 @@
 	  var data = data || new ItemData();
 	  data.h = h;
 	  data.w = w;
-		data.state = new BaseState(data);
+		data.state = new g.items.BaseState();
 	  g.utils.bindPublicProtoFunctions(this, data);
 	}
 
@@ -139,10 +105,10 @@
 	}
 
 	Item.prototype.setAccel = function(data,ax,ay){
-		data.ax = ax;
-		data.ay = ay;
-		data.currAx = ax;
-		data.currAy = ay;
+		data.ax = 0;
+		data.ay = 0;
+		data.maxAx = ax;
+		data.maxAy = ay;
 	}
 
 	Item.prototype.setColor = function(data, color) {
@@ -194,7 +160,6 @@
 	Item.prototype.preRender = function(data){
 		data.state.preRender(data);
 	}
-
 
 	g.items.ItemData = ItemData;
 	g.items.Item = Item;

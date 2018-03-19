@@ -5,8 +5,7 @@
 		this.nextId = 0;
 	};
 
-	var World = function(w,h)
-	{
+	var World = function(w,h){
 		var data = data || new WorldData;
 		data.w = w;
 		data.h = h;

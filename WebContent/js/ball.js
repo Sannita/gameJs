@@ -1,11 +1,11 @@
-(function(g, Item, undefined){
-	var initStates = function(data){
-		var baseUpdate = function(item, world){
+(function(g, Item, BaseState, undefined){
+
+		var baseUpdate = function(data, item, world){
 			item.oldVx = item.vx;
 			item.oldVy = item.vy;
 
-			item.vx += item.currAx;
-			item.vy += item.currAy;
+			item.vx += item.ax;
+			item.vy += item.ay;
 
 			if(item.vx > 0 && item.vx > item.maxVx){
 				item.vx = item.maxVx;
@@ -45,22 +45,26 @@
 			}
 		}
 
+		var basePreRender = function(data, item){
+			data.imageData = g.utils.preRender(2 * item.radius, 2 * item.radius, function(ctx){
+				 ctx.beginPath();
+				 ctx.arc(item.radius + 1, item.radius + 1, item.radius, 0, 2 * Math.PI);
+				 ctx.fillStyle = item.color;
+				 ctx.fill();
+				 ctx.stroke();
+			 });
+		}
+
 		var StandOrMove = function(){
-			var state = this;
-			var imageData = null;
+			BaseState.call(this);
+		}
 
-			state.preRender = function(data){
-				imageData = g.utils.preRender(2 * data.radius, 2 * data.radius, function(ctx){
-					ctx.beginPath();
-					ctx.arc(data.radius + 1, data.radius + 1, data.radius, 0, 2 * Math.PI);
-					ctx.fillStyle = data.color;
-					ctx.fill();
-					ctx.stroke();
-				});
-			}
+		g.utils.inherits(StandOrMove, BaseState);
 
-			state.handleInput = function(item, input){
-				if(item.bounce){
+		StandOrMove.prototype.preRender = basePreRender;
+
+			StandOrMove.prototype.handleInput = function(data, item, input){
+			 if(item.bounce){
 					return item.bouncingState;
 				}
 				if(input['KeyA'] || input['KeyD'] || input['KeyW'] || input['KeyS']){
@@ -68,36 +72,19 @@
 				}
 				return null;
 			}
-			state.enter = function(item, input){
-				item.currAx = item.ax;
-				item.currAy = item.ay;
-			}
-			state.update = baseUpdate;
-			state.render = function(item, ctx, alpha){
-				alpha = alpha || 1;
 
-				var x = alpha * item.x + (1 - alpha) * item.oldX;
-				var y = alpha * item.y + (1 - alpha) * item.oldY;
+	StandOrMove.prototype.update = baseUpdate;
 
-				ctx.drawImage(imageData, x, y);
-			}
-		}
 
-		var Accelerating = function(){
-			var state = this;
-			var imageData = null;
-
-			state.preRender = function(data){
-				imageData = g.utils.preRender(2 * data.radius, 2 * data.radius, function(ctx){
-					ctx.beginPath();
-					ctx.arc(data.radius + 1, data.radius + 1, data.radius, 0, 2 * Math.PI);
-					ctx.fillStyle = data.color;
-					ctx.fill();
-					ctx.stroke();
-				});
+			var Accelerating = function(){
+				BaseState.call(this);
 			}
 
-			state.handleInput = function(item, input){
+			g.utils.inherits(Accelerating, BaseState);
+
+			Accelerating.prototype.preRender = basePreRender;
+
+			Accelerating.prototype.handleInput = function(data, item, input){
 				if(item.bounce){
 					return item.bouncingState;
 				}
@@ -107,69 +94,64 @@
 				return null;
 			}
 
-			state.enter = function(item, input){
+			Accelerating.prototype.enter = function(data, item, input){
 				if(input['KeyA']){
-					item.currAx = item.ax - 1;
+					item.ax = item.ax - 1;
 				}
 				if(input['KeyD']){
-					item.currAx = item.ax + 1;
+					item.ax = item.ax + 1;
 				}
 				if(input['KeyW']){
-					item.currAy = item.ay - 1;
+					item.ay = item.ay - 1;
 				}
 				if(input['KeyS']){
-					item.currAy = item.ay + 1;
+					item.ay = item.ay + 1;
 				}
 			}
 
-			state.update = baseUpdate;
-			state.render = function(item, ctx, alpha){
-				alpha = alpha || 1;
-
-				var x = alpha * item.x + (1 - alpha) * item.oldX;
-				var y = alpha * item.y + (1 - alpha) * item.oldY;
-
-				ctx.drawImage(imageData, x, y);
-			}
-		}
+			Accelerating.prototype.update = baseUpdate;
 
 		var Bouncing = function(){
-			var frame = 0;
-			var frames = [0.04, 0.08, 0.12, 0.16, 0.12, 0.08, 0.04];
-			var imageData = [];
+			var data = new g.items.StateData();
+			data.frame = 0;
+			data.frames = [0.04, 0.08, 0.12, 0.16, 0.12, 0.08, 0.04];
+			data.imageData = [];
 
-			var state = this;
+			BaseState.call(this, data);
+		}
 
-			state.preRender = function(data){
-				for(var i=0;i<frames.length;i++){
-					var d = frames[i];
-					var r1 = data.radius / (1 - d);
-					var r2 = data.radius * (1 - d)
+		g.utils.inherits(Bouncing, BaseState);
 
-					imageData[i] = g.utils.preRender(2 * r1, 2 * r2, function(ctx){
-						var d = frames[i];
+			Bouncing.prototype.preRender = function(data, item){
+				for(var i=0;i<data.frames.length;i++){
+					var d = data.frames[i];
+					var r1 = item.radius / (1 - d);
+					var r2 = item.radius * (1 - d)
+
+					data.imageData[i] = g.utils.preRender(2 * r1, 2 * r2, function(ctx){
+						var d = data.frames[i];
 						ctx.beginPath();
 						ctx.ellipse(r1, r2, r1 , r2, 0, 0, 2 * Math.PI);
-						ctx.fillStyle = data.color;
+						ctx.fillStyle = item.color;
 						ctx.fill();
 						ctx.stroke();
 					});
 				}
 			}
 
-			state.enter = function(item, input){
-				frame = 0;
+			Bouncing.prototype.enter = function(data, item, input){
+				data.frame = 0;
 			}
-			state.handleInput = function(item, input){
-				if(frame >= frames.length){
+			Bouncing.prototype.handleInput = function(data,item, input){
+				if(data.frame >= data.frames.length){
 					item.bounce = false;
 					return item.standOrMoveState;
 				}
 			}
-			state.update = function(item, world){
-				var d = (1 + frame) / frames.length;
+			Bouncing.prototype.update = function(data, item, world){
+				var d = (1 + data.frame) / data.frames.length;
 
-				item.vx += item.currAx;
+				item.vx += item.ax;
 
 				if(item.vx > 0 && item.vx > item.maxVx){
 					item.vx = item.maxVx;
@@ -191,7 +173,7 @@
 					item.vx *= -1;
 				}
 			}
-			state.render = function(item, ctx, alpha){
+			Bouncing.prototype.render = function(data, item, ctx, alpha){
 				alpha = alpha || 1;
 
 				var x = alpha * item.x + (1 - alpha) * item.oldX;
@@ -200,22 +182,15 @@
 				//x = item.x + item.radius;
 				y = item.y;
 
-				var d = frames[frame];
+				var d = data.frames[data.frame];
 
-				ctx.drawImage(imageData[frame], x - (data.radius * d), y + (data.radius * d * 2));
+				ctx.drawImage(data.imageData[data.frame], x - (item.radius * d), y + (item.radius * d * 2));
 
-				frame++;
+				data.frame++;
 			}
-		}
 
-		data.standOrMoveState = new StandOrMove();
-		data.acceleratingState = new Accelerating();
-		data.bouncingState = new Bouncing();
-		data.state = data.standOrMoveState;
-	}
 
-	var Ball = function(radius)
-	{
+	var Ball = function(radius){
 	  var data = new g.items.ItemData();
 	  data.radius = radius;
 		data.maxVx = 30;
@@ -223,7 +198,10 @@
 
 		Item.call(this, 2 * radius, 2 * radius, data);
 
-		initStates(data);
+		data.standOrMoveState = new StandOrMove();
+		data.acceleratingState = new Accelerating();
+		data.bouncingState = new Bouncing();
+		data.state = data.standOrMoveState;
 	}
 
 	g.utils.inherits(Ball, Item);
@@ -232,34 +210,11 @@
 		return data.radius;
 	}
 
-	Ball.prototype.update = function(data, world, t, dt){
-		data.state.update(data, world);
-	}
-
-	Ball.prototype.render = function(data, ctx, alpha ){
-		data.state.render(data,ctx,alpha);
-	}
-
 	Ball.prototype.preRender = function(data){
 		data.standOrMoveState.preRender(data);
 		data.acceleratingState.preRender(data);
 		data.bouncingState.preRender(data);
 	}
 
-	Ball.prototype.collide = function(data, ball){
-		//console.log(this);
-		//console.log(data);
-		//console.log(ball);
-		if(this == ball){
-			return false;
-		}
-		var minDist = (data.radius + ball.getRadius())*(data.radius + ball.getRadius());
-		var dist = (data.x - ball.getX())*(data.x - ball.getX()) + (data.y - ball.getY())*(data.y - ball.getY());
-		if(dist > minDist){
-			return false;
-		}
-		return true;
-	}
-
 	g.items.Ball = Ball;
-})(window.gameJs, window.gameJs.items.Item);
+})(window.gameJs, window.gameJs.items.Item, window.gameJs.items.BaseState);

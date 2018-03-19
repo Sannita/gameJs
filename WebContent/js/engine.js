@@ -1,29 +1,6 @@
 (function(g, undefined){
-	var vendors = ['webkit', 'moz'];
-	for(var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
-		window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
-		window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
-	}
-
-	var lastTime = 0;
-	if (!window.requestAnimationFrame){
-		window.requestAnimationFrame = function(callback, element) {
-			var currTime = performance.now();
-			var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-			var id = setTimeout(function() { callback(currTime + timeToCall); }, timeToCall);
-			lastTime = currTime + timeToCall;
-			return id;
-		};
-	}
-
-	if (!window.cancelAnimationFrame){
-		window.cancelAnimationFrame = function(id) {
-			clearTimeout(id);
-		};
-	}
-
 	var EngineData = function(){
-		this.canvas = null;
+		this.gameCanvas = null;
 		this.ctx = null;
 		this.debug = true;
 		this.running = false;
@@ -31,32 +8,13 @@
 		this.world = null;
 	};
 
-	var Engine = function(world, inputListener){
+	var Engine = function(world, inputListener, physics){
 		var data = data || new EngineData;
 		data.world = world;
 		data.inputListener = inputListener;
-
-		var canvas = document.getElementById('canvas');
-		canvas.height = world.getHeight();
-		canvas.width = world.getWidth();
-
-
-		if (typeof (canvas.getContext) === undefined) {
-			throw new Error('not canvas');
-		}
-
-		var ctx = canvas.getContext('2d');
-
-		data.canvas = canvas;
-		data.ctx = ctx;
-
-		if(data.debug){
-			var stats = new Stats();
-			stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
-			document.body.appendChild( stats.dom );
-			data.stats = stats;
-		}
-
+		data.physics = physics;
+		data.tps = 25;
+		data.maxFrameSkip = 5;
 		g.utils.bindPublicProtoFunctions(this, data);
 	}
 
@@ -122,9 +80,7 @@
 		if(!(data instanceof EngineData))
 			throw new Error('Trying to call private method');
 
-		var tps = 25;
-		var dt = 1000 / tps;
-		var maxFrameSkip = 5;
+		var dt = 1000 / data.tps;
 		var currentTime = performance.now();
 		var accumulator = 0;
 		var t = 0;
@@ -137,8 +93,8 @@
 
 			var newTime =  performance.now();
 			var frameTime = newTime - currentTime;
-			if ( frameTime > 1000 / maxFrameSkip ){
-				frameTime = 1000 / maxFrameSkip;
+			if ( frameTime > 1000 / data.maxFrameSkip ){
+				frameTime = 1000 / data.maxFrameSkip;
 			}
 			currentTime = newTime;
 			accumulator += frameTime;
@@ -164,8 +120,30 @@
 		loop(performance.now());
 	}
 
-	Engine.prototype.init = function(data){
-		data.world.init();
+	Engine.prototype.init = function(data, containerId){
+		var gameCanvas = document.createElement('canvas');
+		gameCanvas.width = data.world.getWidth();
+		gameCanvas.height = data.world.getHeight();
+
+		if (typeof (gameCanvas.getContext) === undefined) {
+			throw new Error('not canvas');
+		}
+
+		document.getElementById(containerId).appendChild(gameCanvas);
+		document.getElementById(containerId).style.width = data.world.getWidth() + 'px';
+		document.getElementById(containerId).style.height = data.world.getHeight() + 'px';
+
+		var ctx = gameCanvas.getContext('2d');
+
+		data.gameCanvas = gameCanvas;
+		data.ctx = ctx;
+
+		if(data.debug){
+			var stats = new Stats();
+			stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
+			document.body.appendChild( stats.dom );
+			data.stats = stats;
+		}
 	}
 
 	Engine.prototype.update = function(data){
@@ -177,6 +155,7 @@
 	}
 
 	Engine.prototype.start = function(data){
+		data.world.init();
 		data.running = true;
 		this.mainLoop_(data);
 	}
