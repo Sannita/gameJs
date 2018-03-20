@@ -15,6 +15,14 @@
 				item.vx = -item.maxVx;
 			}
 
+			if(item.vy > 0 && item.vy > item.maxVy){
+				item.vy = item.maxVy;
+			}
+
+			if(item.vy < 0 && -item.vy > item.maxVy){
+				item.vy = -item.maxVy;
+			}
+
 			item.oldX = item.x;
 			item.oldY = item.y;
 
@@ -63,6 +71,11 @@
 
 		StandOrMove.prototype.preRender = basePreRender;
 
+		StandOrMove.prototype.enter = function(data, item){
+			item.ax = 0;
+			item.ay = 0;
+		}
+
 			StandOrMove.prototype.handleInput = function(data, item, input){
 			 if(item.bounce){
 					return item.bouncingState;
@@ -75,7 +88,6 @@
 
 	StandOrMove.prototype.update = baseUpdate;
 
-
 			var Accelerating = function(){
 				BaseState.call(this);
 			}
@@ -85,6 +97,19 @@
 			Accelerating.prototype.preRender = basePreRender;
 
 			Accelerating.prototype.handleInput = function(data, item, input){
+				if(input['KeyA']){
+					item.ax = - 1;
+				}
+				if(input['KeyD']){
+					item.ax = 1;
+				}
+				if(input['KeyW']){
+					item.ay = - 1;
+				}
+				if(input['KeyS']){
+					item.ay = 1;
+				}
+
 				if(item.bounce){
 					return item.bouncingState;
 				}
@@ -92,21 +117,6 @@
 					return item.standOrMoveState;
 				}
 				return null;
-			}
-
-			Accelerating.prototype.enter = function(data, item, input){
-				if(input['KeyA']){
-					item.ax = item.ax - 1;
-				}
-				if(input['KeyD']){
-					item.ax = item.ax + 1;
-				}
-				if(input['KeyW']){
-					item.ay = item.ay - 1;
-				}
-				if(input['KeyS']){
-					item.ay = item.ay + 1;
-				}
 			}
 
 			Accelerating.prototype.update = baseUpdate;
