@@ -50,7 +50,7 @@
 					continue;
 				}
 				if(items[i].isActive()){
-					items[i].update(data.world);
+					items[i].update(data.world, data.physics);
 				}
 			}
 		}

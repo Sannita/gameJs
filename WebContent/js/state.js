@@ -28,7 +28,7 @@
 
 	}
 
-	BaseState.prototype.update = function(data, item, world){
+	BaseState.prototype.update = function(data, item, world, physics){
 
 	}
 

@@ -1,6 +1,6 @@
 (function(g, Item, BaseState, undefined){
 
-		var baseUpdate = function(data, item, world){
+		var baseUpdate = function(data, item, world, physics){
 			item.oldVx = item.vx;
 			item.oldVy = item.vy;
 
@@ -86,7 +86,7 @@
 				return null;
 			}
 
-	StandOrMove.prototype.update = baseUpdate;
+			StandOrMove.prototype.update = baseUpdate;
 
 			var Accelerating = function(){
 				BaseState.call(this);
@@ -158,7 +158,7 @@
 					return item.standOrMoveState;
 				}
 			}
-			Bouncing.prototype.update = function(data, item, world){
+			Bouncing.prototype.update = function(data, item, world, physics){
 				var d = (1 + data.frame) / data.frames.length;
 
 				item.vx += item.ax;

@@ -31,7 +31,7 @@
 	  var data = data || new ItemData();
 	  data.h = h;
 	  data.w = w;
-		data.state = new g.items.BaseState();
+	  data.state = new g.items.BaseState();
 	  g.utils.bindPublicProtoFunctions(this, data);
 	}
 
@@ -149,8 +149,8 @@
 		}
 	}
 
-	Item.prototype.update = function(data, world, t, dt){
-		data.state.update(data, world);
+	Item.prototype.update = function(data, world, physics, t, dt){
+		data.state.update(data, world, physics);
 	}
 
 	Item.prototype.render = function(data, ctx, alpha){
