@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body, canvas{
+	margin:0;
+	padding:0;
+}
+</style>
+</head>
+<body>
+
+<div id="container" style="border:1px solid #000000;" tabindex="0">
+</div>
+
+<div id="data"></div>
+
+<script type="text/javascript" src="js/core.js" ></script>
+<script type="text/javascript" src="js/utils.js" ></script>
+<script type="text/javascript" src="js/items.js" ></script>
+<script type="text/javascript" src="js/astar/cell.js"></script>
+<script type="text/javascript" src="js/astar/astar.js"></script>
+<script type="text/javascript" src="js/astar/path.js"></script>
+<script type="text/javascript" src="js/astar/maze.js"></script>
+
+<script type="text/javascript">
+(function(g, undefined){
+
+	var containerId = 'container';
+	var width = 561;
+	var height = 561;
+	var dw = 11;
+	var dh = 11;
+	var walls = 3;
+
+	g.Core.setDebug(true);
+	g.Core.setup(containerId, width, height);
+	g.Core.initListeners();
+	g.Core.start();
+
+
+	var grid = new g.Grid(width, height);
+	grid.generate(width, height, dw, dh, walls);
+	//grid.load("astar/map.json");
+	grid.id = 'grid';
+	g.Core.addItem(grid);
+
+	grid.activate();
+	grid.findPath();
+
+})(window.gameJs);
+</script>
+</body>
+</html>

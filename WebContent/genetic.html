@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body, canvas{
+	margin:0;
+	padding:0;
+}
+</style>
+</head>
+<body>
+
+<div id="container" style="border:1px solid #000000;" tabindex="0">
+</div>
+
+<div id="data"></div>
+
+<script type="text/javascript" src="js/core.js" ></script>
+<script type="text/javascript" src="js/utils.js" ></script>
+<script type="text/javascript" src="js/items.js" ></script>
+<script type="text/javascript" src="js/rocket.js" ></script>
+<script type="text/javascript" src="js/dna.js" ></script>
+<script type="text/javascript" src="js/population.js" ></script>
+
+<script type="text/javascript">
+(function(g, undefined){
+
+	var containerId = 'container';
+	var width = 800;
+	var height = 600;
+	var dw = 8;
+	var dh = 8;
+	var walls = 3;
+
+	g.Core.setDebug(true);
+	g.Core.setup(containerId, width, height);
+	g.Core.initListeners();
+	g.Core.start();
+
+	var target = new g.Item(50, 50, 20, 20, 'rgba(255,255,0, 0.6)');
+	target.id = 'target';
+    g.Core.addItem(target);
+
+	var floor = new g.Item(50, height-50, width-100, 20, 'rgb(127,127,127)');
+	floor.id = 'floor';
+    g.Core.addItem(floor);
+
+	var wall = new g.Item(200, height/2, width - 400, 20, 'rgb(127,127,127)');
+	wall.id = 'wall';
+    g.Core.addItem(wall);
+
+
+	var collisions = [floor,wall, target];
+
+	var population = new g.Population(width, height, collisions, target);
+	population.id = 'pop';
+	g.Core.addItem(population);
+
+})(window.gameJs);
+</script>
+</body>
+</html>

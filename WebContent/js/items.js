@@ -1,166 +1,79 @@
-(function(g,undefined){
+(function(g, undefined){
 
-	var ItemData = function(){
-		var itemData = this;
-		itemData.itemId = null;
-		itemData.h = 0;
-		itemData.w = 0;
-		itemData.x = 0;
-		itemData.y = 0;
-		itemData.oldX = 0;
-		itemData.oldY = 0;
-		itemData.maxVx = 0;
-		itemData.maxVy = 0;
-		itemData.vx = 0;
-		itemData.vy = 0;
-		itemData.oldVx = 0;
-		itemData.oldVy = 0;
-		itemData.maxAx = 0;
-		itemData.maxAy = 0;
-		itemData.ax = 0;
-		itemData.ay = 0;
-		itemData.color = 'rgba(0,0,0,0)';
-		itemData.isVisible = true;
-		itemData.isActive = true;
-		itemData.toDelete = false;
-		itemData.state = {};
-	};
-
-	var Item = function(h, w, data)
-	{
-	  var data = data || new ItemData();
-	  data.h = h;
-	  data.w = w;
-	  data.state = new g.items.BaseState();
-	  g.utils.bindPublicProtoFunctions(this, data);
+	var Item = function(x,y,w,h,color){
+		var data = {};
+		data.x = x || 0;
+		data.y = y || 0;
+		data.w = w || 10;
+		data.h = h || 10;
+		data.color = color || 'white';
+		data.visible = true;
+		data.active = false;
+		data.toDelete = false;
+		this.data = data;
 	}
-
-	Item.prototype.getItemId = function(data)
-	{
-	  return data.itemId;
+	
+	Item.prototype.handleInput = function(input){
+		
 	}
-
-	Item.prototype.setItemId = function(data, itemId)
-	{
-	  data.itemId = itemId;
+	
+	Item.prototype.update = function(t){
+		
 	}
-
-	Item.prototype.getWidth = function(data)
-	{
-	  return data.w;
+	
+	Item.prototype.render = function(ctx, alpha){
+		ctx.beginPath();
+		ctx.rect(this.data.x, this.data.y, this.data.w, this.data.h)
+		ctx.fillStyle = this.data.color;
+		ctx.fill();
+		ctx.strokeStyle = 'black';
+		ctx.stroke();
 	}
-
-	Item.prototype.getHeight = function(data)
-	{
-	  return data.h;
+	
+	Item.prototype.hide = function(){
+		this.data.visible = false;
 	}
-
-	Item.prototype.getX = function(data)
-	{
-	  return data.x;
+	
+	Item.prototype.show = function(){
+		this.data.visible = true;
 	}
-
-	Item.prototype.getY = function(data)
-	{
-	  return data.y;
+	
+	Item.prototype.setToDelete = function(){
+		this.data.toDelete = true;
 	}
-
-	Item.prototype.getVx = function(data)
-	{
-	  return data.vx;
+	
+	Item.prototype.activate = function() {
+		this.data.active = true;
 	}
-
-	Item.prototype.getVy = function(data)
-	{
-	  return data.vy;
+	
+	Item.prototype.deActivate = function() {
+		this.data.active = false;
 	}
-
-	Item.prototype.getAx = function(data)
-	{
-	  return data.ax;
+	
+	Item.prototype.isToDelete = function() {
+		return this.data.toDelete;
 	}
-
-	Item.prototype.getAy = function(data)
-	{
-	  return data.ay;
+	
+	Item.prototype.isActive = function() {
+		return this.data.active;
 	}
-
-	Item.prototype.setSize = function(data,h,w){
-		data.h = h;
-		data.w = w;
+	
+	Item.prototype.isVisible = function() {
+		return this.data.visible;
 	}
-
-	Item.prototype.setPos = function(data,x,y){
-		data.x = x;
-		data.y = y;
-		data.oldX = x;
-		data.oldY = y;
-	}
-
-	Item.prototype.setSpeed = function(data,vx,vy){
-		data.vx = vx;
-		data.vy = vy;
-		data.oldVx = vx;
-		data.oldVy = vy;
-	}
-
-	Item.prototype.setAccel = function(data,ax,ay){
-		data.ax = 0;
-		data.ay = 0;
-		data.maxAx = ax;
-		data.maxAy = ay;
-	}
-
-	Item.prototype.setColor = function(data, color) {
-		color = color || 'rgba(0,0,0,0)';
-		data.color = color;
-	}
-
-	Item.prototype.isVisible = function(data) {
-		return data.isVisible;
-	}
-
-	Item.prototype.setVisible = function(data, visible) {
-		data.isVisible = visible;
-	}
-
-
-	Item.prototype.isToDelete = function(data) {
-		return data.toDelete;
-	}
-
-	Item.prototype.setToDelete = function(data, toDelete) {
-		data.toDelete = toDelete;
-	}
-
-	Item.prototype.isActive = function(data) {
-		return data.isActive;
-	}
-
-	Item.prototype.setActive = function(data, active) {
-		data.isActive = active;
-	}
-
-	Item.prototype.handleInput = function(data, input){
-		var state = data.state.handleInput(data, input);
-		if(state){
-			data.state = state;
-			data.state.enter(data, input);
+	
+	Item.prototype.collide = function(x,y,w,h){
+		if( (x >= this.data.x && x <= (this.data.x + this.data.w) && y >= this.data.y && y <= (this.data.y + this.data.h)) ||
+			((x + w) >= this.data.x && (x + w) <= (this.data.x + this.data.w) && y >= this.data.y && y <= (this.data.y + this.data.h)) ||
+			((x + w) >= this.data.x && x <= (this.data.x + this.data.w) && (y+h) >= this.data.y && (y+h) <= (this.data.y + this.data.h)) ||
+			((x + w) >= this.data.x && x <= (this.data.x + this.data.w) && (y+h) >= this.data.y && (y+h) <= (this.data.y + this.data.h))
+		){
+			return this;
+		}else{
+			return false;
 		}
 	}
-
-	Item.prototype.update = function(data, world, physics, t, dt){
-		data.state.update(data, world, physics);
-	}
-
-	Item.prototype.render = function(data, ctx, alpha){
-		data.state.render(data, ctx, alpha);
-	}
-
-	Item.prototype.preRender = function(data){
-		data.state.preRender(data);
-	}
-
-	g.items.ItemData = ItemData;
-	g.items.Item = Item;
-})(window.gameJs);
+	
+	g.Item = Item;
+	
+})(window.gameJs = window.gameJs || {});
