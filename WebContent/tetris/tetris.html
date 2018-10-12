@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body, canvas{
+	margin:0;
+	padding:0;
+}
+</style>
+</head>
+<body>
+
+<div id="container" style="border:1px solid #000000;" tabindex="0">
+</div>
+
+<div id="data"></div>
+
+<script type="text/javascript" src="../js/core.js" ></script>
+<script type="text/javascript" src="../js/utils.js" ></script>
+<script type="text/javascript" src="../js/items.js" ></script>
+<script type="text/javascript" src="js/cell.js"></script>
+<script type="text/javascript" src="js/grid.js"></script>
+<script type="text/javascript" src="js/piece.js"></script>
+<script type="text/javascript" src="js/tetris.js"></script>
+
+<script type="text/javascript">
+(function(g, undefined){
+
+	var containerId = 'container';
+	var width = 420;
+	var height = 600;
+	var dw = 20;
+	var dh = 20;
+	var walls = 3;
+
+	g.Core.setDebug(false);
+	g.Core.setup(containerId, width, height);
+	g.Core.initListeners();
+	g.Core.start();
+
+	var tetris = new g.Tetris(width, height, dw,dh);
+	g.Core.addItem(tetris);
+
+})(window.gameJs);
+</script>
+</body>
+</html>
