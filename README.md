@@ -1,19 +1,9 @@
 # gameJs
-This is an experiment.
+Experiments.
 
 It uses stats.js, Author mrdoob: http://mrdoob.com/
 Repository: https://github.com/mrdoob/stats.js/
 
-I try to follow and apply guidelines from the book Game Programming Patterns http://www.gameprogrammingpatterns.com/
-
-new core
-
-Todo:
-- Refactor and polish source code.
-- Implement a physics component to decouple and generalize some logics from game objects.
-  - Implement collisions.
-- Abstract commands implementing the command pattern and use it in conjuction with state pattern.
-  - Implement simple AI to drive object using the command pattern.
-- Implement an audio component to play sounds.
-- Implement UI component.
-- Realize a demo game.
+genetic.html : rockets that finds a path to target using genetic algorithm
+astar.html : maze generation with reverse backtracking algorithm and A* pathfinding
+tetris.html : just tetris clone. keys : [WASD] to move pieces (W is for testing purposes), [QR] to rotate pieces
