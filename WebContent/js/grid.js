@@ -26,6 +26,41 @@
 		}
 	}
 
+	Grid.prototype.getNeighbors8 = function(cell){
+        var neighbors = [];
+
+        if(cell.j > 0){
+            if(cell.i > 0){
+                neighbors.push(this.grid[cell.i-1][cell.j-1]);
+            }
+            neighbors.push(this.grid[cell.i][cell.j-1]);
+            if(cell.i < this.cols-1){
+                neighbors.push(this.grid[cell.i+1][cell.j-1]);
+            }
+        }
+
+        if(cell.i > 0){
+            neighbors.push(this.grid[cell.i-1][cell.j]);
+        }
+
+        if(cell.i < this.cols-1){
+            neighbors.push(this.grid[cell.i+1][cell.j]);
+        }
+
+        if(cell.j < this.rows - 1){
+            if(cell.i > 0){
+                neighbors.push(this.grid[cell.i-1][cell.j+1]);
+            }
+            neighbors.push(this.grid[cell.i][cell.j+1]);
+            if(cell.i < this.cols-1){
+                neighbors.push(this.grid[cell.i+1][cell.j+1]);
+            }
+        }
+
+        return neighbors;
+    }
+
+
 	Grid.prototype.update = function(dt){
 		if(this.path){
 			this.path.update(dt);

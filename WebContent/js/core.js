@@ -118,7 +118,7 @@ window.gameJs = window.gameJs || {};
 		this.container.appendChild(this.canvas);
 		this.container.style.width = this.canvas.width + 'px';
 		this.container.style.height = this.canvas.height + 'px';
-		
+
 		this.ctx = this.canvas.getContext('2d');
 		this.items = {};
 	}
@@ -170,6 +170,13 @@ window.gameJs = window.gameJs || {};
 		this.container.addEventListener(name, callback, false);
 	}
 
+	Core.prototype.resetMouse = function() {
+		var self = this;
+		self.input['click'] = false;
+		self.input['mousedown'] = false;
+		self.input['mouseup'] = false;
+	}
+
 	Core.prototype.initListeners = function() {
 		var self = this;
 		self.input = {};
@@ -184,37 +191,33 @@ window.gameJs = window.gameJs || {};
 			self.log(key);
 		}, false);
 
-		/*container_.addEventListener('click', function(evt){
-			input_['click'] = true;
-			input_['mouseX'] = evt.clientX;
-			input_['mouseY'] = evt.clientY;
-			log_(evt);
-		}, false);*/
-		/*
+		this.addListener('click', function(evt){
+			self.input['click'] = true;
+			self.input['mouseX'] = evt.clientX;
+			self.input['mouseY'] = evt.clientY;
+			self.log(evt);
+		}, false);
+
 		this.addListener('mousedown', function(evt){
-			this.input['click'] = true;
-			this.input['mouseup'] = false;
-			this.input['mousedown'] = true;
-			this.input['mouseX'] = evt.clientX;
-			this.input['mouseY'] = evt.clientY;
-			this.log(evt);
+			self.input['mousedown'] = true;
+			self.input['mouseX'] = evt.clientX;
+			self.input['mouseY'] = evt.clientY;
+			self.log(evt);
 		}, false);
 
 		this.addListener('mouseup', function(evt){
-			this.input['click'] = false;
-			this.input['mouseup'] = true;
-			this.input['mousedown'] = false;
-			this.input['mouseX'] = evt.clientX;
-			this.input['mouseY'] = evt.clientY;
-			this.log(evt);
+			self.input['mouseup'] = true;
+			self.input['mouseX'] = evt.clientX;
+			self.input['mouseY'] = evt.clientY;
+			self.log(evt);
 		}, false);
 
 		this.addListener('mousemove', function(evt){
-			this.input['mouseX'] = evt.clientX;
-			this.input['mouseY'] = evt.clientY;
-			this.log(evt);
+			self.input['mouseX'] = evt.clientX;
+			self.input['mouseY'] = evt.clientY;
+			self.log(evt);
 		}, false);
-*/
+
 		this.container.focus();
 	}
 
@@ -228,6 +231,10 @@ window.gameJs = window.gameJs || {};
 
 	Core.prototype.deleteItem = function(item){
 		delete this.items[item.id];
+	}
+
+	Core.prototype.getContext = function(){
+		return this.ctx
 	}
 
 	g.Core = new Core();
