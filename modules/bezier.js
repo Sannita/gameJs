@@ -1,0 +1,12 @@
+export { launch as default }
+
+import { Core } from './core.js'
+import { Item } from './item.js'
+
+
+let launch = () => {
+    console.log('be3zier')
+
+
+
+}

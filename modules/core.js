@@ -99,7 +99,6 @@ class Core {
 
     setup  (container, width, height) {
 
-        this.container = document.querySelector(container)
         this.config.width = width
         this.config.height = height
 
@@ -111,12 +110,17 @@ class Core {
             throw new Error('not canvas')
         }
 
+        this.container = document.querySelector(container)
+        while(this.container.firstChild){
+            this.container.removeChild(this.container.lastChild)
+        }
         this.container.appendChild(this.canvas)
         this.container.style.width = this.canvas.width + 'px'
         this.container.style.height = this.canvas.height + 'px'
 
         this.ctx = this.canvas.getContext('2d')
         this.items = {}
+
     }
 
     start () {

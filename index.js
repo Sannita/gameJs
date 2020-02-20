@@ -1,12 +1,32 @@
-import { Core } from './modules/core.js'
-import { Item } from './modules/item.js'
+let apps = [
+    'plague'
+    , 'maze' 
+    //,'rockets' 
+    //,'tetris' 
+    //,'balls'
+    //,'bezier'
+]
 
-let core = new Core()
-core.setup('#container', 640, 360)
-core.start()
+let buttonsContainer = document.querySelector('#buttons')
+    
+apps.forEach(app => {
+    let button = document.createElement('button')
+    
+    button.addEventListener('click', event => {
+        let container = document.querySelector('#container')
+        while(container.firstChild){
+            container.removeChild(container.lastChild)
+        }
+        
+        import('./modules/'+app+'.js').then(module=>{
+            module.default('#container', 640, 360)
+        }).catch(err => {
+            console.log(err)
+        })
+    })
 
+    let text = document.createTextNode(app)
+    button.appendChild(text)
 
-for(let i=5;i<200;i+=20){
-    let item = new Item(i,20,10,10)
-    core.addItem(item)
-}
+    buttonsContainer.appendChild(button)
+})

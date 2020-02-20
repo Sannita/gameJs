@@ -3,7 +3,6 @@ export { Item }
 let itemId = 0
 
 let nextItemId = () => {
-    console.log(itemId)
     return itemId++
 }
 
