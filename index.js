@@ -17,6 +17,9 @@ apps.forEach(app => {
         while(container.firstChild){
             container.removeChild(container.lastChild)
         }
+
+        container.style.width = '0px'
+        container.style.height = '0px'
         
         import('./modules/'+app+'.js').then(module=>{
             module.default('#container', 640, 360)
