@@ -27,7 +27,7 @@ if (!window.cancelAnimationFrame) {
 
 class Core {
 
-    constructor(containerId, width, height) {
+    constructor() {
         this.config = {
             width: 0,
             height: 0,
