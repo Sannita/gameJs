@@ -1,4 +1,4 @@
-export { Core }
+export { initialize, Core }
 
 let initialize = () => {
     if(initialized){
@@ -106,6 +106,7 @@ class Core {
     }
 
     setup  (container, width, height) {
+        initialize()
 
         this.config.width = width
         this.config.height = height
