@@ -13,27 +13,27 @@ class Grid extends Item {
     }
 
     load(url) {
-        var self = this;
-        var request = new XMLHttpRequest();
+        let self = this;
+        let request = new XMLHttpRequest();
         request.onreadystatechange = function () {
             if (request.readyState == XMLHttpRequest.DONE) {
                 if (request.status == 200) {
-                    var json = JSON.parse(request.responseText);
-                    var map = json.map;
+                    let json = JSON.parse(request.responseText);
+                    let map = json.map;
                     self.rows = map.length;
                     self.cols = map[0].length;
                     self.dw = Math.floor(self.width / self.cols);
                     self.dh = Math.floor(self.height / self.rows);
                     self.grid = new Array(self.cols);
-                    for (var i = 0; i < self.cols; i++) {
+                    for (let i = 0; i < self.cols; i++) {
                         self.grid[i] = new Array(self.rows);
-                        for (var j = 0; j < self.rows; j++) {
-                            var cell = map[j][i];
+                        for (let j = 0; j < self.rows; j++) {
+                            let cell = map[j][i];
 
-                            var hex = cell.toString(16);
-                            var c = 255 - cell;
+                            let hex = cell.toString(16);
+                            let c = 255 - cell;
 
-                            var color = 'rgb(' + c + ',' + c + ',' + c + ')';
+                            let color = 'rgb(' + c + ',' + c + ',' + c + ')';
 
                             self.grid[i][j] = new Cell(i, j);
                             self.grid[i][j].value = cell;
@@ -64,12 +64,12 @@ class Grid extends Item {
         this.cols = Math.floor(this.width / this.dw);
         this.rows = Math.floor(this.height / this.dh);
 
-        var stack = [];
+        let stack = [];
 
         this.grid = new Array(this.cols);
-        for (var i = 0; i < this.cols; i++) {
+        for (let i = 0; i < this.cols; i++) {
             this.grid[i] = new Array(this.rows);
-            for (var j = 0; j < this.rows; j++) {
+            for (let j = 0; j < this.rows; j++) {
                 this.grid[i][j] = new Cell(i, j);
                 if (i % 2 == 0 && j % 2 == 0) {
                     this.grid[i][j].value = 0;
@@ -93,12 +93,12 @@ class Grid extends Item {
     }
 
     draw(stack) {
-        var unvisited = stack.length;
-        var current = stack.pop();
+        let unvisited = stack.length;
+        let current = stack.pop();
         current.visited = true;
         unvisited--;
         while (unvisited > 0) {
-            var neighbors = [];
+            let neighbors = [];
             if (current.j > 1 && !this.grid[current.i][current.j - 2].visited) {
                 neighbors.push(this.grid[current.i][current.j - 2]);
             }
@@ -117,8 +117,8 @@ class Grid extends Item {
 
             if (neighbors.length > 0) {
                 stack.push(current);
-                var r = Utils.getRandomInt(0, neighbors.length - 1);
-                var c = neighbors[r];
+                let r = Utils.getRandomInt(0, neighbors.length - 1);
+                let c = neighbors[r];
                 this.removeWall(c, current);
                 current = c;
                 current.visited = true;
@@ -132,7 +132,7 @@ class Grid extends Item {
 
     removeWall(a, b) {
 
-        var w;
+        let w;
         if (a.i == b.i) {
             if (a.j < b.j) {
                 w = this.grid[a.i][a.j + 1];
@@ -158,9 +158,9 @@ class Grid extends Item {
     }
 
     findPath() {
-        var aStar = new AStar(this);
-        var p = aStar.findPath();
-        var path = new Path(p);
+        let aStar = new AStar(this);
+        let p = aStar.findPath();
+        let path = new Path(p);
         this.path = path;
         //console.log(p);
         //console.log(this.path);
@@ -168,7 +168,7 @@ class Grid extends Item {
 
 
     getNeighbors8(cell) {
-        var neighbors = [];
+        let neighbors = [];
 
         if (cell.j > 0) {
             if (cell.i > 0) {
@@ -202,7 +202,7 @@ class Grid extends Item {
     }
 
     getNeighbors4(cell) {
-        var neighbors = [];
+        let neighbors = [];
 
         if (cell.j > 0) {
             neighbors.push(this.grid[cell.i][cell.j - 1]);
@@ -230,8 +230,8 @@ class Grid extends Item {
     }
 
     render(ctx, alpha) {
-        for (var i = 0; i < this.cols; i++) {
-            for (var j = 0; j < this.rows; j++) {
+        for (let i = 0; i < this.cols; i++) {
+            for (let j = 0; j < this.rows; j++) {
                 this.grid[i][j].render(ctx, this.dw, this.dh);
             }
         }

@@ -1,17 +1,17 @@
 export { Core }
 
-var vendors = ['webkit', 'moz']
-for (var x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+let vendors = ['webkit', 'moz']
+for (let x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
     window.requestAnimationFrame = window[vendors[x] + 'RequestAnimationFrame']
     window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame']
 }
 
-var lastTime = 0
+let lastTime = 0
 if (!window.requestAnimationFrame) {
     window.requestAnimationFrame = function (callback, element) {
-        var currTime = performance.now()
-        var timeToCall = Math.max(0, 16 - (currTime - lastTime))
-        var id = setTimeout(() => {
+        let currTime = performance.now()
+        let timeToCall = Math.max(0, 16 - (currTime - lastTime))
+        let id = setTimeout(() => {
             callback(currTime + timeToCall)
         }, timeToCall)
         lastTime = currTime + timeToCall
@@ -49,11 +49,11 @@ class Core {
         for (let i in this.items) {
             if (this.items.hasOwnProperty(i)) {
                 let item = this.items[i]
-                if (item.isToDelete()) {
+                if (item.toDelete) {
                     this.deleteItem(i)
                     continue
                 }
-                if (item.isActive() && item.handleInput) {
+                if (item.active && item.handleInput) {
                     item.handleInput(this.input)
                 }
             }
@@ -64,11 +64,11 @@ class Core {
         for (let i in this.items) {
             if (this.items.hasOwnProperty(i)) {
                 let item = this.items[i]
-                if (item.isToDelete()) {
+                if (item.toDelete) {
                     this.deleteItem(i)
                     continue
                 }
-                if (item.isActive() && item.update) {
+                if (item.active && item.update) {
                     item.update(t)
                 }
             }
@@ -80,11 +80,11 @@ class Core {
         for (let i in this.items) {
             if (this.items.hasOwnProperty(i)) {
                 let item = this.items[i]
-                if (item.isToDelete()) {
+                if (item.toDelete) {
                     this.deleteItem(i)
                     continue;
                 }
-                if (item.isVisible() && item.render) {
+                if (item.visible && item.render) {
                     item.render(this.ctx, alpha)
                 }
             }
@@ -124,20 +124,20 @@ class Core {
     }
 
     start () {
-        var self = this;
+        let self = this;
         this.config.running = true
 
-        var dt = 1000 / this.config.tps;
-        var currentTime = performance.now();
-        var accumulator = 0
-        var t = 0
+        let dt = 1000 / this.config.tps;
+        let currentTime = performance.now();
+        let accumulator = 0
+        let t = 0
 
         let loop = (timestamp) => {
 
             self.handleInput()
 
-            var newTime = performance.now()
-            var frameTime = newTime - currentTime
+            let newTime = performance.now()
+            let frameTime = newTime - currentTime
             if (frameTime > 1000 / self.config.maxFrameSkip) {
                 frameTime = 1000 / self.config.maxFrameSkip
             }
@@ -170,14 +170,14 @@ class Core {
     }
 
     resetMouse () {
-        var self = this
+        let self = this
         self.input['click'] = false
         self.input['mousedown'] = false
         self.input['mouseup'] = false
     }
 
     initListeners(){
-        var self = this
+        let self = this
         self.input = {}
 
         this.addListener('keydown', (key) => {

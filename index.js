@@ -1,4 +1,6 @@
 let buttonListener = (event) => {
+    let app = event.target.dataset.app
+
     let container = document.querySelector('#container')
     
     while(container.firstChild){
@@ -18,6 +20,7 @@ let buttonListener = (event) => {
 let initButton = (app) => {
     let button = document.createElement('button')
     let text = document.createTextNode(app)
+    button.dataset.app = app
     button.appendChild(text)
     button.addEventListener('click', buttonListener)
 
@@ -26,11 +29,11 @@ let initButton = (app) => {
 }
 
 let apps = [
-    'plague'
-    , 'maze' 
+    'maze'
+    , 'plague' 
     //,'rockets' 
     //,'tetris' 
     //,'balls'
     //,'bezier'
 ]
-apps.forEach(app => initButton)
+apps.forEach(initButton)

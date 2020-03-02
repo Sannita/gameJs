@@ -8,7 +8,7 @@ class Point{
             throw new InvalidParameter('x is not a positive number: ${x}')
         }
         if( ! y instanceof Number || y < 0){
-            throw new InvalidParameter('y is not a positive number: ${y}')    
+            throw new InvalidParameter('y is not a positive number: ${y}')   
         }
         this.x = x
         this.y = y

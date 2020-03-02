@@ -1,8 +1,8 @@
 export { Renderer }
 
 class Renderer{
-    constructor(){
-    
+    constructor(renderOptions){
+        this.renderOptions = renderOptions
     }
     
     render(ctx, alpha, geometry){

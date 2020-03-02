@@ -1,5 +1,6 @@
 export {Line}
 
+import { Point } from './point.js'
 import {InvalidParameter} from '../errors.js' 
 
 class Line{
