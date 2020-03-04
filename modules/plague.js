@@ -1,7 +1,12 @@
 
 export { launch as default }
 
-import { Core, Item, Point, Line, LineRenderer, InvalidParameter } from './engine/engine.js'
+import { Core, Item, 
+    Point, Line, Circle,Rectangle, Triangle, Square, Shape,
+    InvalidParameter,  
+    CircleRenderer,  ShapeRenderer,  PointRenderer } from './engine/engine.js'
+
+import { Vector2D } from './engine/math/math.js'
 
 let launch = () => {
     console.log('plague')
@@ -9,26 +14,18 @@ let launch = () => {
     core.setup('#container', 640, 360)
     core.start()
 
-    let p1 = new Point(20, 10)
-    let p2 = new Point(620, 10)
-    let p3 = new Point(20, 350)
-    let p4 = new Point(620, 350)
-    let line1 = new Line(p1, p2)
-    let line2 = new Line(p2, p3)
-    let line3 = new Line(p3, p4)
-    let line4 = new Line(p4, p1)
-    let renderer1 = new LineRenderer()
-    let renderer2 = new LineRenderer({ lineWidth : '10'})
-    let renderer3 = new LineRenderer({ lineCap : 'butt', lineJoin : 'square', lineWidth : '1', strokeStyle : 'blue'})
-    let renderer4 = new LineRenderer({ lineCap : 'square', lineJoin : 'circle', lineWidth : '3', strokeStyle : 'green'})
-    let item1 = new Item(line1, renderer1)
-    let item2 = new Item(line2, renderer2)
-    let item3 = new Item(line3, renderer3)
-    let item4 = new Item(line4, renderer4)
-    
-    core.addItem(item1)
-    core.addItem(item2)
-    core.addItem(item3)
-    core.addItem(item4)
+    let shape = new Item(new Shape([
+            new Point(100,200), 
+            new Point(300,50), 
+            new Point(200,100), 
+            new Point(500,100), 
+            new Point(500, 60), 
+            new Point(400, 50)
+        ]), new ShapeRenderer({ lineCap : 'square', lineJoin : 'circle', lineWidth : '3', strokeStyle : 'green', fill : false, closePath : false}))
+    core.addItem(shape)
+
+    let v = new Vector2D(3,4)
+
+    console.log(v)
 
 }
