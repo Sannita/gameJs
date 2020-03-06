@@ -11,7 +11,7 @@ class Line{
         if( ! b instanceof Point){
             throw new InvalidParameter('b is not a point: ${b}')
         }
-        this.shape = new Array([a,b])
+        this.shape = new Array(a,b)
     }
 
     length(){

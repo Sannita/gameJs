@@ -1,3 +1,4 @@
-import { Vector2D } from './vector.js'
+import { Vector, Vector2D } from './vector2d.js'
+import { Matrix } from './matrix.js'
 
-export { Vector2D }
+export { Vector, Vector2D, Matrix }

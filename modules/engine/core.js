@@ -85,6 +85,10 @@ class Core {
 
     render (alpha)  {
         this.ctx.clearRect(0, 0, this.config.width, this.config.height)
+        this.ctx.save()
+        this.ctx.translate(this.config.width/2, this.config.height /2)
+        this.ctx.scale(1,-1)
+
         for (let i in this.items) {
             if (this.items.hasOwnProperty(i)) {
                 let item = this.items[i]
@@ -97,6 +101,8 @@ class Core {
                 }
             }
         }
+
+        this.ctx.restore()
     }
 
     log (item) {

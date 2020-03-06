@@ -1,4 +1,4 @@
-export { ShapeRenderer }
+export { ShapeRenderer, LineRenderer }
 
 import { Renderer } from './renderer.js'
 
@@ -7,11 +7,11 @@ class ShapeRenderer extends Renderer{
         super(renderOptions)
 
         if(renderOptions.fill === undefined){
-            renderOptions.fill = true
+            this.renderOptions.fill = true
         }
 
         if(renderOptions.closePath === undefined){
-            renderOptions.closePath = true
+            this.renderOptions.closePath = true
         }
     }
 
@@ -37,5 +37,15 @@ class ShapeRenderer extends Renderer{
         }
         ctx.stroke()
         ctx.restore()
+    }
+}
+
+class LineRenderer extends ShapeRenderer{
+    constructor(renderOptions = {}){
+        super(renderOptions)
+
+        this.renderOptions.fill = false
+        this.renderOptions.closePath = false
+
     }
 }

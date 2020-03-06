@@ -4,9 +4,9 @@ export { launch as default }
 import { Core, Item, 
     Point, Line, Circle,Rectangle, Triangle, Square, Shape,
     InvalidParameter,  
-    CircleRenderer,  ShapeRenderer,  PointRenderer } from './engine/engine.js'
+    CircleRenderer,  ShapeRenderer, LineRenderer, PointRenderer } from './engine/engine.js'
 
-import { Vector2D } from './engine/math/math.js'
+import { Vector2D, Vector, Matrix } from './engine/math/math.js'
 
 let launch = () => {
     console.log('plague')
@@ -14,18 +14,15 @@ let launch = () => {
     core.setup('#container', 640, 360)
     core.start()
 
-    let shape = new Item(new Shape([
-            new Point(100,200), 
-            new Point(300,50), 
-            new Point(200,100), 
-            new Point(500,100), 
-            new Point(500, 60), 
-            new Point(400, 50)
-        ]), new ShapeRenderer({ lineCap : 'square', lineJoin : 'circle', lineWidth : '3', strokeStyle : 'green', fill : false, closePath : false}))
-    core.addItem(shape)
+    let lr = new LineRenderer()
+    let axisX = new Item(new Line(new Point(-320,0), new Point(320,0)), lr )
+    let axisY = new Item(new Line(new Point(0,-180), new Point(0,180)), lr )
+    
+    core.addItem(axisX)
+    core.addItem(axisY)
 
-    let v = new Vector2D(3,4)
-
-    console.log(v)
+    let v = new Vector2D(30,40)
+    let m = new Item(new Line(new Point(0,0), new Point(30,40)), lr)
+    core.addItem(m)
 
 }
