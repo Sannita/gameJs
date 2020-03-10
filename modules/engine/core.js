@@ -36,21 +36,7 @@ let initialize = () => {
 class Core {
 
     constructor() {
-        this.config = {
-            width: 0,
-            height: 0,
-            running: false,
-            debug: true,
-            tps: 25,
-            maxFrameSkip: 5
-        }
-
-        this.ctx = null
-        this.canvas = null
-        this.container = null
-        this.input = null
-        this.items = null
-
+      this.clean()
     }
 
     handleInput() {
@@ -111,9 +97,34 @@ class Core {
         }
     }
 
-    setup  (container, width, height) {
+    clean() {
+        let container = this.container
+
+        this.config = {
+            width: 0,
+            height: 0,
+            running: false,
+            debug: true,
+            tps: 25,
+            maxFrameSkip: 5
+        }
+
+        this.ctx = null
+        this.canvas = null
+        this.container = null
+        this.input = null
+        this.items = null
+
+        while(container && container.firstChild){
+            container.removeChild(container.lastChild)
+        }
+    }
+
+    setup(container, width, height) {
         initialize()
 
+        this.clean()
+        
         this.config.width = width
         this.config.height = height
 

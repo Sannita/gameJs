@@ -1,39 +1,58 @@
-export { Vector, Vector2D }
+export { Vector}
 
 class Vector{
     constructor(data){
         this.data = data
     }
 
+    get(i){
+        return this.data[i]
+    }
+
+    set(i, value){
+        this.data[i] = value
+    }
+
+    size(){
+        return this.data.length
+    }
+
     dot(v){
-        let acc = 0
-        for(let i=0;i<this.data.length;i++){
-            acc += this.data [i] * v.data[j]
-        }
+        let acc = this.data.map((e,i)=> [e, v.data[i]]).reduce( (a,b) => { return a[0] * a[1] + b[0] * b[1] } )
         return Math.sqrt(acc)
     }
 
-    magnitude(){
-        return Math.sqrt(this.data.reduce((a,b) => { a * a + b * b }))
+    sum(v){
+        let result = this.data.map((e,i)=> { return e + v.data[i] } )
+        return new Vector(result)
     }
-    
-    /*cross(v){
-        let m1 = this.magnitude()
-        let m2 = v.magnitude()
-        let t1 = this.angle()
-        let t2 = v.angle()
-        return m1 * m2 * Math.sin(t2 - t1)
-    }*/
-}
 
-class Vector2D extends Vector{
-    constructor(x,y){
-        super([x,y])
-        
+    mul(x){
+        let result = this.data.map((e)=> { x * e } )
+        return result
+    }
+
+    magnitude(){
+        return Math.sqrt(this.data.reduce((a,b) => { return a * a + b * b }))
+    }
+
+    normalize(){
+        let magnitude = this.magnitude()
+        return this.mul(1 / magnitude)
+    }
+
+    distance(v){
+        let result = this.data.map((e,i)=> [e, v.data[i]]).reduce( (a,b) => {
+            return ( a[1] - a[0] ) * ( a[1] - a[0] ) + ( b[1] - b[0] ) * ( b[1] - b[0] ) 
+        } )
+        return Math.sqrt(result)
     }
 
     angle(){
-        return Math.atan2(this.data[0] / this.data[1])
+        if(this.data.length > 2){
+            throw new Error('angle non defined for more than 2 dimensions')
+        }
+        return Math.atan2(this.data[1], this.data[0])
     }
-    
+
 }

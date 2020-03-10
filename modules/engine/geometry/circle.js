@@ -4,12 +4,9 @@ import { Point } from './point.js'
 import {InvalidParameter} from '../errors.js' 
 
 class Circle{
-    constructor(center, radius){
-        if( !center instanceof Point){
-            throw new InvalidParameter('center is not a point: ${center}')
-        }
+    constructor(x, y, radius){
         
-        this.center = center
+        this.center = new Point(x,y)
         this.radius = radius
     }
 
