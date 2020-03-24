@@ -1,0 +1,59 @@
+<html>
+
+<head>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: darkgray;
+        }
+
+        #container {
+            background-color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+    </div>
+
+    <script type="text/javascript">
+
+        (function ($, undefined) {
+
+         
+            let itemId = 0
+
+            let nextItemId = () => {
+                console.log(itemId)
+                return itemId++
+            }
+
+            class Point{
+                constructor(x,y){
+                    this.x = x;
+                    this.y = y;
+                }
+
+            }
+
+      
+            $.Core = Core
+            $.Item = Item
+            $.Point = Point
+
+            init()
+
+        }(window.thePlague = window.thePlague || {}))
+
+        let c = new thePlague.Core('container', 300, 200)
+        c.start()
+
+        
+
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body, canvas{
+	margin:0;
+	padding:0;
+}
+</style>
+</head>
+<body>
+
+<div id="container" style="border:1px solid #000000;">
+</div>
+<div>
+	<sstrike>-Refactor and polish source code.</sstrike><br>
+	--Customizable engine<br>
+	-Implement a physics component to decouple and generalize some logics from game objects.<br>
+	-- Implement collisions.<br>
+	-Abstract commands implementing the command pattern and use it in conjuction with state pattern.<br>
+	-- Implement simple AI to drive object using the command pattern.<br>
+	-Implement an audio component to play sounds.<br>
+	-Implement UI component.<br>
+	-Realize a demo game.<br>
+</div>
+
+
+<script type="text/javascript" src="js/stats.js"></script>
+<script type="text/javascript" src="js/core.js"></script>
+<script type="text/javascript" src="js/colors.js"></script>
+<script type="text/javascript" src="js/physics.js"></script>
+<script type="text/javascript" src="js/inputListener.js"></script>
+<script type="text/javascript" src="js/engine.js"></script>
+<script type="text/javascript" src="js/world.js"></script>
+<script type="text/javascript" src="js/state.js"></script>
+<script type="text/javascript" src="js/items.js"></script>
+<script type="text/javascript" src="js/ball.js"></script>
+<script type="text/javascript" src="js/car.js"></script>
+<script type="text/javascript" src="js/bar.js"></script>
+
+<script type="text/javascript">
+(function(g, undefined){
+	/*
+	var w = 800;
+	var h = 600;
+
+	var world = new g.World(w,h);
+	//var ui = new g.ui(800,600);
+	var inputListener = new g.InputListener();
+	var physics = new g.Physics();
+	var engine = new g.Engine(world, inputListener, physics);
+	engine.init('container');
+	//var i = g.utils.getRandomInt(0,1023);
+
+	var start = 0;
+	var end = 1;
+	var bar = new g.items.Bar(start, end, 5, 775);
+	bar.setColor('green');
+	bar.setPos(10,10);
+	world.addItem(bar);
+	engine.render();
+
+	var i = start;
+	function addBall(){
+		var size = g.utils.getRandomInt(5,30);
+		var startX = g.utils.getRandomInt(10,790 - 2*size);
+		var startY = g.utils.getRandomInt(30,590 - 2*size);
+		var startVx = g.utils.getRandomInt(-10,10);
+		var startVy = g.utils.getRandomInt(-10,10);
+		var color = g.utils.findColor(i%256);
+		var ball = new g.items.Ball(size);
+		ball.setPos(startX,startY);
+		ball.setSpeed(startVx,startVy);
+		ball.setAccel(0,0.1);
+		ball.setColor(color['hexString']);
+		world.addItem(ball);
+		bar.setValue(bar.getValue() + 1);
+		ball.preRender();
+		engine.render();
+		i++;
+		if(i < end){
+			window.setTimeout(addBall, 1);
+		}else{
+			bar.setToDelete(true);
+			world.init();
+			engine.start();
+		}
+	}
+
+	addBall();
+
+	/*
+	var i = 0;
+	function loop(){
+		engine.update();
+		engine.render();
+		i++;
+		if(i > 20){
+			return;
+		}
+		window.setTimeout(loop , 1000);
+	}
+
+	window.setTimeout(loop , 1000);
+		*//*
+		var car = new g.items.Car(18,32);
+		car.setPos(100,100);
+		car.setSpeed(0,0);
+		car.setAccel(5,5);
+		car.setColor(g.utils.findColor(g.utils.getRandomInt(0,256))['hexString']);
+		world.addItem(car);
+
+		engine.start();*/
+})(window.gameJs);
+</script>
+</body>
+</html>

@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body, canvas{
+	margin:0;
+	padding:0;
+}
+</style>
+</head>
+<body>
+
+<div id="container" style="border:1px solid #000000;" tabindex="0">
+</div>
+
+<script type="text/javascript">
+'use strict';
+
+(function(g, undefined){
+
+	let idCounter = 0;
+
+	let initialize = function(){
+		let vendors = ['webkit', 'moz'];
+		for(let x = 0; x < vendors.length && !window.requestAnimationFrame; ++x) {
+			window.requestAnimationFrame = window[vendors[x]+'RequestAnimationFrame'];
+			window.cancelAnimationFrame = window[vendors[x]+'CancelAnimationFrame'] || window[vendors[x]+'CancelRequestAnimationFrame'];
+		}
+
+		let lastTime = 0;
+		if (!window.requestAnimationFrame){
+			window.requestAnimationFrame = function(callback, element) {
+				let currTime = performance.now();
+				let timeToCall = Math.max(0, 16 - (currTime - lastTime));
+				let id = setTimeout(function() { callback(currTime + timeToCall); }, timeToCall);
+				lastTime = currTime + timeToCall;
+				return id;
+			};
+		}
+
+		if (!window.cancelAnimationFrame){
+			window.cancelAnimationFrame = function(id) {
+				clearTimeout(id);
+			};
+		}
+
+	}
+	
+	class Core{
+		constructor(){
+			this.config = {
+				width : 0,
+				height : 0,
+				running : false,
+				debug : true,
+				tps : 25,
+				maxFrameSkip : 5
+			};
+
+			this.ctx = null;
+			this.canvas = null;
+			this.container = null;
+			this.input = null;
+			this.items = null;
+		}
+		
+		setup(containerId, width, height){
+
+			this.container = document.getElementById(containerId);
+			this.config.width = width;
+			this.config.height = height;
+
+			this.canvas = document.createElement('canvas');
+			this.canvas.width = width;
+			this.canvas.height = height;
+
+			if (typeof (this.canvas.getContext) === undefined) {
+				throw new Error('not canvas');
+			}
+
+			this.container.appendChild(this.canvas);
+			this.container.style.width = this.canvas.width + 'px';
+			this.container.style.height = this.canvas.height + 'px';
+
+			this.ctx = this.canvas.getContext('2d');
+			this.items = new Map();
+		}
+		
+		start(){
+			let self = this;
+			this.config.running = true;
+
+			let dt = 1000 / this.config.tps;
+			let currentTime = performance.now();
+			let accumulator = 0;
+			let t = 0;
+
+			let loop = function(timestamp) {
+
+				self.handleInput();
+
+				let newTime =  performance.now();
+				let frameTime = newTime - currentTime;
+				if ( frameTime > 1000 / self.config.maxFrameSkip ){
+					frameTime = 1000 / self.config.maxFrameSkip;
+				}
+				currentTime = newTime;
+				accumulator += frameTime;
+				while ( accumulator >= dt )
+				{
+					self.update(dt);
+					accumulator -= dt;
+					t += dt;
+				}
+
+				let alpha = accumulator / dt;
+				self.render(alpha);
+
+				if(self.config.running){
+					window.requestAnimationFrame(loop);
+				}
+			}
+
+			loop(performance.now());
+
+		}
+
+		stop(){
+			this.config.running = false;
+		}
+
+		log(item){
+			if(this.config.debug){
+				console.log(item);
+			}
+		}
+
+		addListener(name, callback){
+			this.container.addEventListener(name, callback, false);
+		}
+
+		resetMouse() {
+			let self = this;
+			self.input['click'] = false;
+			self.input['mousedown'] = false;
+			self.input['mouseup'] = false;
+		}
+
+		initListeners() {
+			let self = this;
+			self.input = {};
+
+			this.addListener('keydown', function(key){
+				self.input[key.code] = true;
+				self.log(key);
+			}, false);
+
+			this.addListener('keyup', function(key){
+				self.input[key.code] = false;
+				self.log(key);
+			}, false);
+
+			this.addListener('click', function(evt){
+				self.input['click'] = true;
+				self.input['mouseX'] = evt.clientX;
+				self.input['mouseY'] = evt.clientY;
+				self.log(evt);
+			}, false);
+
+			this.addListener('mousedown', function(evt){
+				self.input['mousedown'] = true;
+				self.input['mouseX'] = evt.clientX;
+				self.input['mouseY'] = evt.clientY;
+				self.log(evt);
+			}, false);
+
+			this.addListener('mouseup', function(evt){
+				self.input['mouseup'] = true;
+				self.input['mouseX'] = evt.clientX;
+				self.input['mouseY'] = evt.clientY;
+				self.log(evt);
+			}, false);
+
+			this.addListener('mousemove', function(evt){
+				self.input['mouseX'] = evt.clientX;
+				self.input['mouseY'] = evt.clientY;
+				self.log(evt);
+			}, false);
+
+			this.container.focus();
+		}
+		
+		handleInput(){
+			let self = this;
+			self.ctx.clearRect(0,0,self.config.width,self.config.height);
+			for(let value of self.items.values()){
+				if(value.isToDelete()){
+					self.items.delete(value.id);
+					continue;
+				}
+				if(value.isActive() && value.handleInput){
+					value.handleInput(t);
+				}
+			}
+		}
+
+		update(t){
+			let self = this;
+			self.ctx.clearRect(0,0,self.config.width,self.config.height);
+			for(let value of self.items.values()){
+				if(value.isToDelete()){
+					self.items.delete(value.id);
+					continue;
+				}
+				if(value.isActive() && value.update){
+					value.update(t);
+				}
+			}
+		}
+
+		render(alpha){
+			let self = this;
+			self.ctx.clearRect(0,0,self.config.width,self.config.height);
+			for(let value of self.items.values()){
+				if(value.isToDelete()){
+					self.items.delete(value.id);
+					continue;
+				}
+				if(value.isVisible() && value.render){
+					value.render(self.ctx, alpha);
+				}
+			}
+		}
+		
+		setDebug(debug){
+			this.config.debug = debug;
+		}
+
+		addItem(item){
+			this.items.set(item.id, item);
+		}
+
+		deleteItem(item){
+			this.items.delete(item.id);
+		}
+
+		getContext(){
+			return this.ctx
+		}
+
+	}
+	
+	class Drawable{
+		constructor(){
+			this.id = idCounter++ 
+			this.toDelete = false
+			this.visible = false
+			this.active = false
+		}
+		setToDelete(){
+			this.doDelete = true
+		}
+		isToDelete(){
+			return this.toDelete
+		}
+		setActive(active){
+			this.active = active
+		}
+		isActive(){
+			return this.active
+		}
+		setVisible(visible){
+			this.visible = visible
+		}
+		isVisible(){
+			return this.visible
+		}
+		handleInput(input){
+			
+		}
+		update(time){
+			
+		}
+		render(context, alpha){
+			context.lineWidth = 1;
+			context.strokeStyle = 'black';
+			context.stroke();
+		}
+	}
+	
+	class Point{
+		constructor(x,y){
+			this.x=x;
+			this.y=y;
+		}
+		
+		euclideanDistanceFrom(point){
+			let dx = point.x - this.x;
+			let dy = point.y - this.y;
+			return Math.sqrt(dx*dx+dy*dy);
+		}
+		
+		manhattanDistanceFrom(point){
+			let dx = Math.abs(point.x - this.x);
+			let dy = Math.abs(point.y - this.y);
+			return dx + dy;
+		}
+		
+		equals(point){
+			return this.x == point.x && this.y == point.y;
+		}
+
+	}
+	
+	class PointRenderer extends Drawable{
+		constructor(point){
+			super();
+			this.point = point;
+		}
+		
+		render(context, alpha){
+			context.beginPath();
+			context.rect(this.point.x, this.point.y, 1, 1);
+			super.render(context, alpha);
+		}
+	}
+	
+	class Edge{
+		constructor(a,b){
+			if(a.x <= b.x){
+				this.a=a;
+				this.b=b;
+			}else{
+				this.a=b;
+				this.b=a;
+			}
+		}
+		
+		equals(edge){
+			return this.a.equals(edge.a) && this.b.equals(edge.b); // || this.a.equals(edge.b) && this.b.equals(edge.a)
+		}
+	}
+	
+	class EdgeRenderer extends Drawable{
+	
+		constructor(edge){
+			super();
+			this.edge = edge;
+		}
+		
+		render(context, alpha){
+			context.beginPath();
+			context.moveTo(this.edge.a.x, this.edge.a.y);
+			context.lineTo(this.edge.b.x, this.edge.b.y);
+			context.closePath();
+			context.lineWidth = 1;
+			context.strokeStyle = 'red';
+			context.stroke();
+		}
+	}
+
+	class Circle{
+		constructor(center, radius){
+			this.center = center;
+			this.radius = radius;
+		}
+		
+		containsPoint(point){
+			return point.euclideanDistanceFrom(this.center) < this.radius;
+		}
+		
+		equals(circle){
+			return this.center.equals(circle) && this.radius == radius;
+		}
+
+	}
+	
+	class CircleRenderer extends Drawable{
+	
+		constructor(circle){
+			super();
+			this.circle = circle;
+		}
+		
+		render(context, alpha){
+			context.beginPath();
+			context.arc(this.circle.center.x, this.circle.center.y, this.circle.radius, 0, 2 * Math.PI, false);
+			super.render(context, alpha);
+		}
+	}
+	
+	class Rectangle extends Drawable{
+		constructor(topLeft,bottomRight){
+			super();
+			this.topLeft = topLeft;
+			this.bottomRight = bottomRight;
+		}
+
+	}
+	
+	class RectangleRenderer extends Drawable{
+		constructor(rectangle){
+			super();
+			this.rectangle = rectangle;
+		}
+					
+		render(context, alpha){
+			context.beginPath();
+			context.rect(this.rectangle.topLeft.x, this.rectangle.topLeft.y, this.rectangle.bottomRight.x - this.rectangle.topLeft.x, this.rectangle.bottomRight.y - this.rectangle.topLeft.y);
+			super.render(context, alpha);
+		}
+	}
+	
+	class Triangle{
+		constructor(a,b,c){
+			this.a = a;
+			this.b = b;
+			this.c = c;
+		}
+				
+		getCircumCircle(){
+			let ax = this.a.x;
+			let ay = this.a.y;
+			let bx = this.b.x;
+			let by = this.b.y;
+			let cx = this.c.x;
+			let cy = this.c.y;
+			
+			let d = 2 * ( ay * cx + by * ax - by * cx - ay * bx - cy * ax + cy * bx );
+		
+			let px =( by * ax * ax 
+					- cy * ax * ax
+					- by * by * ay
+					+ cy * cy * ay
+					+ bx * bx * cy
+					+ ay * ay * by
+					+ cx * cx * ay
+					- cy * cy * by
+					- cx * cx * by 
+					- bx * bx * ay
+					+ by * by * cy
+					- ay * ay * cy ) / d;
+					
+			let py =( ax * ax * cx
+					+ ay * ay * cx
+					+ bx * bx * ax
+					- bx * bx * cx
+					+ by * by * ax
+					- by * by * cx
+					- ax * ax * bx
+					- ay * ay * bx
+					- cx * cx * ax
+					+ cx * cx * bx
+					- cy * cy * ax
+					+ cy * cy * bx) / d;
+			let radius = Math.sqrt((ax - px)*(ax - px) + (ay - py)*(ay - py));
+		
+			let center = new Point(px,py);
+			let circle = new Circle(center,radius);
+			return circle;
+		}
+		
+		getEdges(){
+			let edges = [];
+			edges.push(new Edge(this.a,this.b));
+			edges.push(new Edge(this.a,this.c));
+			edges.push(new Edge(this.b,this.c));
+			return edges;
+		}
+	}
+	
+	class TriangleRenderer extends Drawable{
+		constructor(triangle){
+			super();
+			this.triangle = triangle;
+		}
+		
+		render(context, alpha){
+			context.beginPath();
+			context.moveTo(this.triangle.a.x, this.triangle.a.y);
+			context.lineTo(this.triangle.b.x, this.triangle.b.y);
+			context.lineTo(this.triangle.c.x, this.triangle.c.y);
+			context.lineTo(this.triangle.a.x, this.triangle.a.y);
+			context.closePath();
+			context.lineWidth = 1;
+			context.strokeStyle = 'blue';
+			context.stroke();
+		}
+	}
+	
+	g.Core = Core;
+	g.Edge = Edge;
+	g.Point = Point;
+	g.Circle = Circle;
+	g.Drawable = Drawable;
+	g.Triangle = Triangle;
+	g.Rectangle = Rectangle;
+	g.EdgeRenderer = EdgeRenderer;
+	g.PointRenderer = PointRenderer;
+	g.CircleRenderer = CircleRenderer;
+	g.TriangleRenderer = TriangleRenderer;
+	g.RectangleRenderer = RectangleRenderer;
+
+})(window.gameJs || (window.gameJs = {}) );
+
+let containerId = 'container';
+let width = 800;
+let height = 600;
+
+let core = new gameJs.Core();
+
+core.setDebug(false);
+core.setup(containerId, width, height);
+core.initListeners();
+
+core.start();
+
+let bowyerWatson = function(points, triangle){
+	let triangulation = [];
+	triangulation.push(triangle);
+	for(let i=0;i<points.length;i++){
+		let badTriangles = [];
+		let p = points[i];
+		for(let j=0;j<triangulation.length;j++){
+			let t = triangulation[j];
+			if(t.getCircumCircle().containsPoint(p)){
+				badTriangles.push(t);
+			}
+		}
+		let polygon = {};
+		for(let j=0;j<badTriangles.length;j++){
+			let t = badTriangles[j];
+			let edges = t.getEdges();
+			edges.forEach(edge=>{
+				let key = JSON.stringify(edge);
+				if(polygon[key]){
+					polygon[key] = polygon[key] + 1;
+				}else{
+					polygon[key] = 1;
+				}
+			});
+			
+			Object.keys(polygon).forEach(key=>{
+				if(polygon[key] > 1){
+					delete polygon[key];
+				}
+			});
+		
+		}
+		for(let j=0;j<badTriangles.length;j++){
+			let t = badTriangles[j];
+			let ind = triangulation.indexOf(t);
+			if(ind > -1){
+				triangulation.splice(ind,1);
+			}
+		}
+		
+		Object.keys(polygon).forEach(key=>{
+			let edge = JSON.parse(key);
+			let t = new gameJs.Triangle(new gameJs.Point(edge.a.x, edge.a.y), new gameJs.Point(edge.b.x, edge.b.y), p);
+			triangulation.push(t);
+		});
+	}
+	
+	triangulation = triangulation.filter(t =>{
+		let toRemove = (t.a.equals(triangle.a) || t.a.equals(triangle.b) || t.a.equals(triangle.c)
+			|| t.b.equals(triangle.a) || t.b.equals(triangle.b) || t.b.equals(triangle.c)
+			|| t.c.equals(triangle.a) || t.c.equals(triangle.b) || t.c.equals(triangle.c));
+		return !toRemove;
+	});
+	
+	return triangulation;
+}
+
+let delaunayToVoronoi = function(triangulation){
+	/*
+	let triangles be our Delaunay triangulation;
+	let edges be the distinct edges in triangles;
+
+	FOR each edge in edges:
+		IF edge has a triangle on both sides:
+			let t1, t2 be the triangles adjacent to edge
+			let cc1, cc2 be the circumcenters of t1, t2
+			let newEdge be the edge (cc1, cc2)
+			add newEdge to vorEdges
+	*/
+	let edges = new Map();
+	triangulation.forEach(t=>{
+		let e = t.getEdges();
+		e.forEach(edge=>{
+			let tmp = edges.get(JSON.stringify(edge));
+			if(tmp === undefined){
+				tmp = { t1: t, t2 : null };
+				edges.set(JSON.stringify(edge), tmp);
+			}else{
+				tmp.t2 = t;
+			}
+		});
+	});
+	
+	let vorEdges = [];
+	for( let [k,v] of edges){
+		if( v.t2 != null){
+			let c1 = v.t1.getCircumCircle().center;
+			let c2 = v.t2.getCircumCircle().center;
+			let e = new gameJs.Edge(c1,c2);
+			vorEdges.push(e);
+		}else{
+			let tmp = JSON.parse(k);
+			let cx = ( tmp.a.x + tmp.b.x) / 2;
+			let cy = ( tmp.a.y + tmp.b.y) / 2;
+			let c1 = v.t1.getCircumCircle().center;
+			let endX = 0;
+			let endY = 0;
+			if(cx == c1.x ){
+				endX = c1.x;
+			}
+			if(cx > c1.x ){
+				endX = 800;
+			}
+			if(cy == c1.y ){
+				endY = c1.y;
+			}
+			if(cy > c1.y ){
+				endY = 600;
+			}
+			let c2 = new gameJs.Point(cx, cy);
+			//let c2 = new gameJs.Point(endX, endY);
+			let e = new gameJs.Edge(c1,c2);
+			vorEdges.push(e);
+		}
+	}
+	
+	return vorEdges;
+}
+			
+let minX = 0;
+let maxX = 800;
+let minY = 0;
+let maxY = 600;
+
+let genPoints = function(n){
+	let points = [];
+	for(let i=0;i<n;i++){
+		let x = Math.floor(Math.random() * (maxX-minX)) + minX;
+		let y = Math.floor(Math.random() * (maxY-minY)) + minY;		
+		points.push(new gameJs.Point(x,y));
+	}
+	return points;
+}
+
+let p1 = new gameJs.Point(minX,minY);
+let p2 = new gameJs.Point(2 * maxX,minY);
+let p3 = new gameJs.Point(minX,2 * maxY);
+
+let t1 = new gameJs.Triangle(p1,p2,p3);
+
+let points = genPoints(10);
+
+let triangulation = bowyerWatson(points,t1);
+
+let voro = delaunayToVoronoi(triangulation);
+
+triangulation.forEach(triangle=>{
+	let tr = new gameJs.TriangleRenderer(triangle);
+	tr.setVisible(true);
+	core.addItem(tr);
+	
+	let c = triangle.getCircumCircle();
+	let pr = new gameJs.PointRenderer(c.center);
+	pr.setVisible(true);
+	core.addItem(pr);
+})
+
+voro.forEach(edge=>{
+	let er = new gameJs.EdgeRenderer(edge);
+	er.setVisible(true);
+	core.addItem(er);
+})
+
+points.forEach(point=>{
+	let pr = new gameJs.PointRenderer(point);
+	pr.setVisible(true);
+	core.addItem(pr);
+});
+
+</script>
+</body>
+</html>

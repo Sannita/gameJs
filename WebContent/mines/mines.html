@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body, canvas{
+	margin:0;
+	padding:0;
+}
+</style>
+</head>
+<body>
+
+<div id="container" style="border:1px solid #000000;" tabindex="0">
+</div>
+
+<div id="data"></div>
+
+<script type="text/javascript" src="../js/core.js" ></script>
+<script type="text/javascript" src="../js/utils.js" ></script>
+<script type="text/javascript" src="../js/items.js" ></script>
+<script type="text/javascript" src="../js/cell.js"></script>
+<script type="text/javascript" src="../js/grid.js"></script>
+<script type="text/javascript" src="js/mines.js"></script>
+
+<script type="text/javascript">
+(function(g, undefined){
+
+	var containerId = 'container';
+	var dw = 40;
+	var dh = 40;
+
+	var rows = 15;
+	var cols = 20;
+
+	var mines = 30;
+
+	var width = cols * dw;
+	var height = rows * dh;
+
+
+	g.Core.setDebug(false);
+	g.Core.setup(containerId, width, height);
+	g.Core.initListeners();
+	g.Core.config.tps = 10;
+	g.Core.start();
+
+	var mines = new g.Mines(width, height, dw, dh, mines);
+	g.Core.addItem(mines);
+
+})(window.gameJs);
+</script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+html, body, canvas{
+	margin:0;
+	padding:0;
+}
+</style>
+</head>
+<body>
+
+<div id="container" style="border:1px solid #000000;" tabindex="0">
+</div>
+
+<div id="data"></div>
+
+<script type="text/javascript" src="js/core.js" ></script>
+<script type="text/javascript" src="js/utils.js" ></script>
+<script type="text/javascript" src="js/items.js" ></script>
+
+
+<script type="text/javascript">
+(function(g, undefined){
+/*
+ function BowyerWatson (pointList)
+      // pointList is a set of coordinates defining the points to be triangulated
+      triangulation := empty triangle mesh data structure
+      add super-triangle to triangulation // must be large enough to completely contain all the points in pointList
+      for each point in pointList do // add all the points one at a time to the triangulation
+         badTriangles := empty set
+         for each triangle in triangulation do // first find all the triangles that are no longer valid due to the insertion
+            if point is inside circumcircle of triangle
+               add triangle to badTriangles
+         polygon := empty set
+         for each triangle in badTriangles do // find the boundary of the polygonal hole
+            for each edge in triangle do
+               if edge is not shared by any other triangles in badTriangles
+                  add edge to polygon
+         for each triangle in badTriangles do // remove them from the data structure
+            remove triangle from triangulation
+         for each edge in polygon do // re-triangulate the polygonal hole
+            newTri := form a triangle from edge to point
+            add newTri to triangulation
+      for each triangle in triangulation // done inserting points, now clean up
+         if triangle contains a vertex from original super-triangle
+            remove triangle from triangulation
+      return triangulation
+
+*/
+
+			class Point{
+				constructor(x,y){
+					this.x=x;
+					this.y=y;
+				}
+				
+				distanceFrom(point){
+					return Math.sqrt((point.x - this.x)*(point.x - this.x) + (point.y - this.y)*(point.y - this.y));
+				}
+				
+				equals(point){
+					return this.x == point.x && this.y == point.y;
+				}
+			}
+			
+			class Edge{
+				constructor(a,b){
+					if(a.x <= b.x){
+						this.a=a;
+						this.b=b;
+					}else{
+						this.a=b;
+						this.b=a;
+					}
+				}
+				
+				equals(edge){
+					return this.a.equals(edge.a) && this.b.equals(edge.b); // || this.a.equals(edge.b) && this.b.equals(edge.a)
+				}
+			}
+			
+			class Circle{
+				constructor(center,radius){
+					this.center=center;
+					this.radius=radius;
+				}
+				
+				contains(point){
+					return this.center.distanceFrom(point) < this.radius;
+				}
+			}
+			
+			class Triangle{
+				constructor(a,b,c){
+					this.a=a;
+					this.b=b;
+					this.c=c;
+				}
+				
+				getEdges(){
+					var edges = [];
+					edges.push(new Edge(this.a,this.b));
+					edges.push(new Edge(this.a,this.c));
+					edges.push(new Edge(this.b,this.c));
+					return edges;
+				}
+				
+				getCircumCircle(){
+					var ax = this.a.x;
+					var ay = this.a.y;
+					var bx = this.b.x;
+					var by = this.b.y;
+					var cx = this.c.x;
+					var cy = this.c.y;
+					
+					var d = 2 * ( ay * cx + by * ax - by * cx - ay * bx - cy * ax + cy * bx );
+				
+					var px =( by * ax * ax 
+							- cy * ax * ax
+							- by * by * ay
+							+ cy * cy * ay
+							+ bx * bx * cy
+							+ ay * ay * by
+							+ cx * cx * ay
+							- cy * cy * by
+							- cx * cx * by 
+							- bx * bx * ay
+							+ by * by * cy
+							- ay * ay * cy ) / d;
+							
+					var py =( ax * ax * cx
+							+ ay * ay * cx
+							+ bx * bx * ax
+							- bx * bx * cx
+							+ by * by * ax
+							- by * by * cx
+							- ax * ax * bx
+							- ay * ay * bx
+							- cx * cx * ax
+							+ cx * cx * bx
+							- cy * cy * ax
+							+ cy * cy * bx) / d;
+
+					var radius = Math.sqrt((ax - px)*(ax - px) + (ay - py)*(ay - py));
+				
+					var center = new Point(px,py);
+					var circle = new Circle(center,radius);
+					return circle;
+				}
+			}
+			
+			var bowyerWatson = function(points, triangle){
+				var triangulation = [];
+				triangulation.push(triangle);
+				for(var i=0;i<points.length;i++){
+					var badTriangles = [];
+					var p = points[i];
+					for(var j=0;j<triangulation.length;j++){
+						var t = triangulation[j];
+						if(t.getCircumCircle().contains(p)){
+							badTriangles.push(t);
+						}
+					}
+					var polygon = {};
+					for(var j=0;j<badTriangles.length;j++){
+						var t = badTriangles[j];
+						var edges = t.getEdges();
+						edges.forEach(edge=>{
+							var key = JSON.stringify(edge);
+							if(polygon[key]){
+								polygon[key] = polygon[key] + 1;
+							}else{
+								polygon[key] = 1;
+							}
+						});
+						
+						Object.keys(polygon).forEach(key=>{
+							if(polygon[key] > 1){
+								delete polygon[key];
+							}
+						});
+					
+					}
+					for(var j=0;j<badTriangles.length;j++){
+						var t = badTriangles[j];
+						var ind = triangulation.indexOf(t);
+						if(ind > -1){
+							triangulation.splice(ind,1);
+						}
+					}
+					
+					Object.keys(polygon).forEach(key=>{
+						var edge = JSON.parse(key);
+						var t = new Triangle(new Point(edge.a.x, edge.a.y), new Point(edge.b.x, edge.b.y), p);
+						triangulation.push(t);
+					});
+
+				}
+				
+				triangulation = triangulation.filter(t =>{
+					var toRemove = (t.a.equals(triangle.a) || t.a.equals(triangle.b) || t.a.equals(triangle.c)
+						|| t.b.equals(triangle.a) || t.b.equals(triangle.b) || t.b.equals(triangle.c)
+						|| t.c.equals(triangle.a) || t.c.equals(triangle.b) || t.c.equals(triangle.c));
+					return !toRemove;
+				});
+				
+				return triangulation;
+			}
+			
+	var minX = 200;
+	var maxX = 600;
+	var minY = 100;
+	var maxY = 500;
+	
+	var genPoints = function(n){
+		var points = [];
+		for(var i=0;i<n;i++){
+			var x = Math.floor(Math.random() * (maxX-minX)) + minX;
+			var y = Math.floor(Math.random() * (maxY-minY)) + minY;		
+			points.push(new Point(x,y));
+		}
+		return points;
+	}
+	
+	var p1 = new Point(minX,minY);
+	var p2 = new Point(2 * maxX,minY);
+	var p3 = new Point(minX,2 * maxY);
+	
+	var t1 = new Triangle(p1,p2,p3);
+	
+	var points = genPoints(10);
+	
+	var triangulation = bowyerWatson(points,t1);
+
+	var containerId = 'container';
+	var width = 800;
+	var height = 600;
+
+	g.Core.setDebug(false);
+	g.Core.setup(containerId, width, height);
+	g.Core.initListeners();
+	g.Core.start();
+
+	var i=0;
+	triangulation.forEach(triangle=>{
+		var t = new g.Item();
+		t.id='t'+i;
+		t.render = function(ctx, alpha){
+			ctx.beginPath();
+			ctx.moveTo(triangle.a.x, triangle.a.y);
+			ctx.lineTo(triangle.b.x, triangle.b.y);
+			ctx.lineTo(triangle.c.x, triangle.c.y);
+			ctx.lineTo(triangle.a.x, triangle.a.y);
+			ctx.closePath();
+			ctx.stroke();
+		}
+		g.Core.addItem(t);
+		i++;
+	})
+	
+	
+
+	
+
+})(window.gameJs);
+</script>
+</body>
+</html>
