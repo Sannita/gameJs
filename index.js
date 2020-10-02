@@ -11,7 +11,7 @@ let buttonListener = (event) => {
     container.style.height = '0px'
     
     import('./modules/'+app+'.js').then(module=>{
-        module.default('#container', 640, 360)
+        module.default('#container', 600, 600)
     }).catch(err => {
         console.log(err)
     })
@@ -29,8 +29,9 @@ let initButton = (app) => {
 }
 
 let apps = [
-    'maze'
-    , 'plague' 
+    'hex'
+    //,'maze'
+    //, 'plague' 
     //,'rockets' 
     //,'tetris' 
     //,'balls'
