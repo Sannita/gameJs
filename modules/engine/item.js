@@ -16,6 +16,10 @@ class Item {
         this.toDelete = false
     }
 
+    getGeometry(){
+        return this.geometry
+    }
+
     handleInput (input) {
 
     }

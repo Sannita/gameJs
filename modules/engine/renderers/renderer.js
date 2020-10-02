@@ -5,7 +5,7 @@ class Renderer{
         this.renderOptions = renderOptions
     }
     
-    render(ctx, alpha, geometry){
+    render(ctx, alpha, item){
 
     }
 }

@@ -30,8 +30,9 @@ let initButton = (app) => {
 
 let apps = [
     'hex'
+    //,'arkham'
     //,'maze'
-    //, 'plague' 
+   // ,'plague'
     //,'rockets' 
     //,'tetris' 
     //,'balls'
